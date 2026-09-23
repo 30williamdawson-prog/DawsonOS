@@ -19,6 +19,7 @@
             flex-direction: column;
             height: 100vh;
             overflow: hidden;
+            transition: background 0.3s;
         }
 
         header {
@@ -59,8 +60,9 @@
             border-radius: 12px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
             border: 1px solid #23232a;
+            overflow-y: auto;
         }
 
         .sidebar h2 {
@@ -68,18 +70,19 @@
             text-transform: uppercase;
             letter-spacing: 1.2px;
             color: #666677;
+            margin-top: 10px;
             margin-bottom: 5px;
         }
 
         .app-btn {
             background-color: #1f1f24;
             color: #dddde8;
-            padding: 12px 14px;
+            padding: 10px 12px;
             border-radius: 8px;
             border: 1px solid #2d2d35;
             cursor: pointer;
             text-align: left;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             transition: all 0.2s ease;
             display: flex;
             align-items: center;
@@ -161,17 +164,118 @@
             color: #ffffff;
             font-size: 1rem;
             outline: none;
-            transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s;
+            transition: border-color 0.2s, background-color 0.2s;
         }
 
         .search-input:focus {
             border-color: #f96332;
             background-color: #1f1f28;
-            box-shadow: 0 0 15px rgba(249, 99, 50, 0.2);
         }
 
-        .search-input::placeholder {
-            color: #555566;
+        /* --- Launch Cards --- */
+        .launch-card {
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .launch-btn {
+            padding: 12px 24px;
+            background-color: #f96332;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* --- AI Assistant --- */
+        #ai-app {
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .chat-box {
+            flex: 1;
+            background: #1a1a20;
+            border-radius: 8px;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #2d2d35;
+        }
+
+        .chat-msg {
+            padding: 10px 14px;
+            border-radius: 8px;
+            max-width: 75%;
+            font-size: 0.95rem;
+        }
+
+        .user-msg {
+            background: #f96332;
+            align-self: flex-end;
+        }
+
+        .ai-msg {
+            background: #2b2b36;
+            align-self: flex-start;
+        }
+
+        .chat-input-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #2d2d35;
+            background: #1a1a20;
+            color: white;
+            outline: none;
+        }
+
+        /* --- Paint App --- */
+        #paint-app {
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+            gap: 10px;
+        }
+
+        canvas {
+            background: #ffffff;
+            border-radius: 8px;
+            cursor: crosshair;
+        }
+
+        .paint-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        /* --- Stopwatch --- */
+        #stopwatch-app {
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .timer-display {
+            font-size: 4rem;
+            font-weight: bold;
+            font-family: monospace;
         }
 
         /* --- Tic Tac Toe --- */
@@ -202,14 +306,17 @@
             cursor: pointer;
             border-radius: 8px;
             color: #f96332;
-            transition: background 0.2s;
         }
 
-        .cell:hover {
-            background-color: #24242e;
+        /* --- Snake Game --- */
+        #snake-app {
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
-        /* --- Calculator App --- */
+        /* --- Calculator --- */
         #calculator-app {
             flex-direction: column;
             align-items: center;
@@ -253,19 +360,9 @@
             cursor: pointer;
             font-size: 1.1rem;
             font-weight: bold;
-            transition: background 0.2s;
         }
 
-        .calc-btn:hover {
-            background-color: #323240;
-        }
-
-        .calc-btn.op {
-            background-color: #f96332;
-            border-color: #f96332;
-        }
-
-        /* --- Notes App --- */
+        /* --- Notes --- */
         #notes-app {
             flex-direction: column;
             padding: 20px;
@@ -285,18 +382,21 @@
             outline: none;
         }
 
-        #notesArea:focus {
-            border-color: #f96332;
+        /* --- Settings --- */
+        #settings-app {
+            flex-direction: column;
+            padding: 30px;
+            gap: 20px;
         }
 
-        .reset-btn {
-            padding: 10px 20px;
-            background-color: #f96332;
-            color: #ffffff;
-            border: none;
+        .theme-opt {
+            padding: 10px 15px;
+            background: #1a1a20;
+            border: 1px solid #2d2d35;
+            color: white;
             border-radius: 6px;
-            font-weight: 600;
             cursor: pointer;
+            margin-right: 10px;
         }
     </style>
 </head>
@@ -310,11 +410,25 @@
     <div class="main-container">
         <!-- Sidebar Navigation -->
         <div class="sidebar">
-            <h2>Applications</h2>
+            <h2>System</h2>
             <button class="app-btn" onclick="openApp('browser')">🌐 Search Bar</button>
-            <button class="app-btn" onclick="openApp('tictactoe')">❌ Tic-Tac-Toe</button>
-            <button class="app-btn" onclick="openApp('calculator')">🧮 Calculator</button>
+            <button class="app-btn" onclick="openApp('ai')">🤖 Dawson AI</button>
             <button class="app-btn" onclick="openApp('notes')">📝 Quick Notes</button>
+            <button class="app-btn" onclick="openApp('calculator')">🧮 Calculator</button>
+            <button class="app-btn" onclick="openApp('stopwatch')">⏱️ Stopwatch</button>
+            <button class="app-btn" onclick="openApp('paint')">🎨 Canvas Paint</button>
+
+            <h2>Web & Media</h2>
+            <button class="app-btn" onclick="openApp('youtube')">▶️ YouTube</button>
+            <button class="app-btn" onclick="openApp('geforce')">🎮 GeForce NOW</button>
+            <button class="app-btn" onclick="openApp('spotify')">🎵 Spotify</button>
+            <button class="app-btn" onclick="openApp('discord')">💬 Discord</button>
+            <button class="app-btn" onclick="openApp('twitch')">🟣 Twitch</button>
+
+            <h2>Games & Config</h2>
+            <button class="app-btn" onclick="openApp('snake')">🐍 Snake Game</button>
+            <button class="app-btn" onclick="openApp('tictactoe')">❌ Tic-Tac-Toe</button>
+            <button class="app-btn" onclick="openApp('settings')">⚙️ Settings</button>
         </div>
 
         <!-- Main Display Area -->
@@ -329,7 +443,77 @@
                 </div>
             </div>
 
-            <!-- Tic-Tac-Toe App Screen -->
+            <!-- Dawson AI App -->
+            <div id="ai-app" class="app-screen">
+                <h2>Dawson AI Assistant</h2>
+                <div class="chat-box" id="chatBox">
+                    <div class="chat-msg ai-msg">Hello! I am Dawson AI. Ask me anything!</div>
+                </div>
+                <div class="chat-input-container">
+                    <input type="text" id="chatInput" class="chat-input" placeholder="Type a message..." onkeydown="sendAiMessage(event)">
+                    <button class="launch-btn" onclick="processAiMessage()">Send</button>
+                </div>
+            </div>
+
+            <!-- Canvas Paint App -->
+            <div id="paint-app" class="app-screen">
+                <div class="paint-controls">
+                    <label>Color: </label>
+                    <input type="color" id="paintColor" value="#f96332">
+                    <button class="launch-btn" onclick="clearCanvas()">Clear Canvas</button>
+                </div>
+                <canvas id="paintCanvas" width="600" height="400"></canvas>
+            </div>
+
+            <!-- Stopwatch App -->
+            <div id="stopwatch-app" class="app-screen">
+                <div class="timer-display" id="stopwatchDisplay">00:00.00</div>
+                <div>
+                    <button class="launch-btn" onclick="startStopwatch()">Start</button>
+                    <button class="launch-btn" onclick="stopStopwatch()">Stop</button>
+                    <button class="launch-btn" onclick="resetStopwatch()">Reset</button>
+                </div>
+            </div>
+
+            <!-- Web App Launch Cards (Bypasses Frame Blocks) -->
+            <div id="youtube-app" class="app-screen launch-card">
+                <h2>YouTube Launcher</h2>
+                <p>External web services block direct embedding inside browser frames. Launch directly in a new tab:</p>
+                <button class="launch-btn" onclick="window.open('https://youtube.com', '_blank')">Open YouTube</button>
+            </div>
+
+            <div id="geforce-app" class="app-screen launch-card">
+                <h2>GeForce NOW Launcher</h2>
+                <p>Stream your PC games directly from NVIDIA servers in a clean tab:</p>
+                <button class="launch-btn" onclick="window.open('https://play.geforcenow.com', '_blank')">Launch GeForce NOW</button>
+            </div>
+
+            <div id="spotify-app" class="app-screen launch-card">
+                <h2>Spotify Web Player</h2>
+                <p>Listen to music and podcasts on the web player:</p>
+                <button class="launch-btn" onclick="window.open('https://open.spotify.com', '_blank')">Open Spotify</button>
+            </div>
+
+            <div id="discord-app" class="app-screen launch-card">
+                <h2>Discord Web</h2>
+                <p>Chat with communities and friends directly in your browser:</p>
+                <button class="launch-btn" onclick="window.open('https://discord.com/app', '_blank')">Open Discord</button>
+            </div>
+
+            <div id="twitch-app" class="app-screen launch-card">
+                <h2>Twitch Livestreams</h2>
+                <p>Watch live gaming, esports, and creative broadcasts:</p>
+                <button class="launch-btn" onclick="window.open('https://twitch.tv', '_blank')">Open Twitch</button>
+            </div>
+
+            <!-- Snake Game -->
+            <div id="snake-app" class="app-screen">
+                <h2>Snake Game</h2>
+                <canvas id="snakeCanvas" width="400" height="400" style="background:#1a1a20;"></canvas>
+                <button class="launch-btn" onclick="startSnake()">Start Game</button>
+            </div>
+
+            <!-- Tic-Tac-Toe -->
             <div id="tictactoe-app" class="app-screen">
                 <h3 id="status" style="margin-bottom: 10px;">Player X's Turn</h3>
                 <div class="board">
@@ -343,10 +527,10 @@
                     <div class="cell" onclick="makeMove(this, 7)"></div>
                     <div class="cell" onclick="makeMove(this, 8)"></div>
                 </div>
-                <button class="reset-btn" onclick="resetGame()" style="margin-top: 15px;">Restart Game</button>
+                <button class="launch-btn" onclick="resetGame()" style="margin-top: 15px;">Restart Game</button>
             </div>
 
-            <!-- Calculator App Screen -->
+            <!-- Calculator -->
             <div id="calculator-app" class="app-screen">
                 <div class="calc-body">
                     <input type="text" id="calcDisplay" readonly placeholder="0">
@@ -354,17 +538,17 @@
                         <button class="calc-btn" onclick="clearCalc()">C</button>
                         <button class="calc-btn" onclick="appendCalc('/')">/</button>
                         <button class="calc-btn" onclick="appendCalc('*')">*</button>
-                        <button class="calc-btn op" onclick="appendCalc('-')">-</button>
+                        <button class="calc-btn" style="background:#f96332;" onclick="appendCalc('-')">-</button>
                         
                         <button class="calc-btn" onclick="appendCalc('7')">7</button>
                         <button class="calc-btn" onclick="appendCalc('8')">8</button>
                         <button class="calc-btn" onclick="appendCalc('9')">9</button>
-                        <button class="calc-btn op" onclick="appendCalc('+')">+</button>
+                        <button class="calc-btn" style="background:#f96332;" onclick="appendCalc('+')">+</button>
                         
                         <button class="calc-btn" onclick="appendCalc('4')">4</button>
                         <button class="calc-btn" onclick="appendCalc('5')">5</button>
                         <button class="calc-btn" onclick="appendCalc('6')">6</button>
-                        <button class="calc-btn op" onclick="solveCalc()">=</button>
+                        <button class="calc-btn" style="background:#f96332;" onclick="solveCalc()">=</button>
                         
                         <button class="calc-btn" onclick="appendCalc('1')">1</button>
                         <button class="calc-btn" onclick="appendCalc('2')">2</button>
@@ -374,20 +558,30 @@
                 </div>
             </div>
 
-            <!-- Notes App Screen -->
+            <!-- Quick Notes -->
             <div id="notes-app" class="app-screen">
                 <h2>Quick Notepad</h2>
-                <textarea id="notesArea" placeholder="Type your notes here... (They save automatically!)" oninput="saveNotes()"></textarea>
+                <textarea id="notesArea" placeholder="Type your notes here..." oninput="saveNotes()"></textarea>
+            </div>
+
+            <!-- Settings -->
+            <div id="settings-app" class="app-screen">
+                <h2>System Settings</h2>
+                <div>
+                    <p style="margin-bottom:10px;">Select Theme Background:</p>
+                    <button class="theme-opt" onclick="setTheme('dark')">Default Dark</button>
+                    <button class="theme-opt" onclick="setTheme('blue')">Ocean Gradient</button>
+                    <button class="theme-opt" onclick="setTheme('purple')">Neon Purple</button>
+                </div>
             </div>
 
         </div>
     </div>
 
     <script>
-        // Real-time Clock
+        // Clock
         function updateClock() {
-            const now = new Date();
-            document.getElementById('clock').innerText = now.toLocaleTimeString();
+            document.getElementById('clock').innerText = new Date().toLocaleTimeString();
         }
         setInterval(updateClock, 1000);
         updateClock();
@@ -398,7 +592,7 @@
             document.getElementById(appName + '-app').classList.add('active');
         }
 
-        // Search bar handler
+        // Search Bar
         function handleSearch(event) {
             if (event.key === 'Enter') {
                 const query = document.getElementById('searchInput').value.trim();
@@ -412,75 +606,130 @@
             }
         }
 
-        // Tic Tac Toe Logic
-        let currentPlayer = 'X';
-        let boardState = ['', '', '', '', '', '', '', '', ''];
-        let gameActive = true;
+        // AI Assistant
+        function sendAiMessage(e) { if (e.key === 'Enter') processAiMessage(); }
+        function processAiMessage() {
+            const input = document.getElementById('chatInput');
+            const msg = input.value.trim();
+            if(!msg) return;
 
-        const winningCombos = [
-            [0, 1, 2], [3, 4, 5], [6, 7, 8],
-            [0, 3, 6], [1, 4, 7], [2, 5, 8],
-            [0, 4, 8], [2, 4, 6]
-        ];
+            const chatBox = document.getElementById('chatBox');
+            chatBox.innerHTML += `<div class="chat-msg user-msg">${msg}</div>`;
+            input.value = '';
 
+            setTimeout(() => {
+                let reply = "I am a simple Dawson OS bot. How can I help you today?";
+                if(msg.toLowerCase().includes('hello') || msg.toLowerCase().includes('hi')) reply = "Hello! Welcome to Dawson OS.";
+                if(msg.toLowerCase().includes('who made you')) reply = "I was built for Dawson OS!";
+                chatBox.innerHTML += `<div class="chat-msg ai-msg">${reply}</div>`;
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }, 500);
+        }
+
+        // Canvas Paint
+        const canvas = document.getElementById('paintCanvas');
+        const ctx = canvas.getContext('2d');
+        let painting = false;
+
+        canvas.addEventListener('mousedown', () => painting = true);
+        canvas.addEventListener('mouseup', () => { painting = false; ctx.beginPath(); });
+        canvas.addEventListener('mousemove', draw);
+
+        function draw(e) {
+            if(!painting) return;
+            const rect = canvas.getBoundingClientRect();
+            ctx.lineWidth = 5;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = document.getElementById('paintColor').value;
+            ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+        }
+        function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+
+        // Stopwatch
+        let timer, ms = 0, running = false;
+        function startStopwatch() {
+            if(!running) {
+                running = true;
+                timer = setInterval(() => {
+                    ms += 10;
+                    let sec = Math.floor(ms / 1000);
+                    let msec = Math.floor((ms % 1000) / 10);
+                    document.getElementById('stopwatchDisplay').innerText = 
+                        `${sec < 10 ? '0' : ''}${sec}:${msec < 10 ? '0' : ''}${msec}`;
+                }, 10);
+            }
+        }
+        function stopStopwatch() { running = false; clearInterval(timer); }
+        function resetStopwatch() { stopStopwatch(); ms = 0; document.getElementById('stopwatchDisplay').innerText = "00:00.00"; }
+
+        // Snake Game
+        function startSnake() {
+            const sCanvas = document.getElementById('snakeCanvas');
+            const sCtx = sCanvas.getContext('2d');
+            let snake = [{x: 200, y: 200}], food = {x: 100, y: 100}, dx = 20, dy = 0;
+
+            document.onkeydown = (e) => {
+                if (e.key === 'ArrowUp' && dy === 0) { dx = 0; dy = -20; }
+                if (e.key === 'ArrowDown' && dy === 0) { dx = 0; dy = 20; }
+                if (e.key === 'ArrowLeft' && dx === 0) { dx = -20; dy = 0; }
+                if (e.key === 'ArrowRight' && dx === 0) { dx = 20; dy = 0; }
+            };
+
+            let game = setInterval(() => {
+                let head = {x: snake[0].x + dx, y: snake[0].y + dy};
+                if(head.x < 0 || head.x >= 400 || head.y < 0 || head.y >= 400) { clearInterval(game); alert('Game Over!'); return; }
+                snake.unshift(head);
+                if(head.x === food.x && head.y === food.y) {
+                    food = {x: Math.floor(Math.random()*20)*20, y: Math.floor(Math.random()*20)*20};
+                } else { snake.pop(); }
+
+                sCtx.fillStyle = '#1a1a20'; sCtx.fillRect(0, 0, 400, 400);
+                sCtx.fillStyle = '#f96332'; sCtx.fillRect(food.x, food.y, 18, 18);
+                sCtx.fillStyle = '#ffffff'; snake.forEach(part => sCtx.fillRect(part.x, part.y, 18, 18));
+            }, 150);
+        }
+
+        // Settings Theme
+        function setTheme(theme) {
+            if(theme === 'dark') document.body.style.background = 'radial-gradient(circle at center, #1b1b24 0%, #0d0d11 100%)';
+            if(theme === 'blue') document.body.style.background = 'linear-gradient(135deg, #0f2027, #203a43, #2c5364)';
+            if(theme === 'purple') document.body.style.background = 'linear-gradient(135deg, #240b36, #c31432)';
+        }
+
+        // Tic Tac Toe
+        let currentPlayer = 'X', boardState = ['', '', '', '', '', '', '', '', ''], gameActive = true;
+        const winningCombos = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
         function makeMove(cell, index) {
             if (boardState[index] !== '' || !gameActive) return;
-
-            boardState[index] = currentPlayer;
-            cell.innerText = currentPlayer;
-
-            if (checkWin()) {
-                document.getElementById('status').innerText = `Player ${currentPlayer} Wins!`;
-                gameActive = false;
-                return;
+            boardState[index] = currentPlayer; cell.innerText = currentPlayer;
+            if (winningCombos.some(c => c.every(i => boardState[i] === currentPlayer))) {
+                document.getElementById('status').innerText = `Player ${currentPlayer} Wins!`; gameActive = false; return;
             }
-
-            if (!boardState.includes('')) {
-                document.getElementById('status').innerText = "It's a Draw!";
-                gameActive = false;
-                return;
-            }
-
+            if (!boardState.includes('')) { document.getElementById('status').innerText = "It's a Draw!"; gameActive = false; return; }
             currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
             document.getElementById('status').innerText = `Player ${currentPlayer}'s Turn`;
         }
-
-        function checkWin() {
-            return winningCombos.some(combo => {
-                return combo.every(index => boardState[index] === currentPlayer);
-            });
-        }
-
         function resetGame() {
-            boardState = ['', '', '', '', '', '', '', '', ''];
-            gameActive = true;
-            currentPlayer = 'X';
+            boardState = ['', '', '', '', '', '', '', '', '']; gameActive = true; currentPlayer = 'X';
             document.getElementById('status').innerText = "Player X's Turn";
-            document.querySelectorAll('.cell').forEach(cell => cell.innerText = '');
+            document.querySelectorAll('#tictactoe-app .cell').forEach(cell => cell.innerText = '');
         }
 
-        // Calculator Logic
-        function appendCalc(val) {
-            document.getElementById('calcDisplay').value += val;
-        }
-        function clearCalc() {
-            document.getElementById('calcDisplay').value = '';
-        }
+        // Calculator
+        function appendCalc(val) { document.getElementById('calcDisplay').value += val; }
+        function clearCalc() { document.getElementById('calcDisplay').value = ''; }
         function solveCalc() {
-            try {
-                document.getElementById('calcDisplay').value = eval(document.getElementById('calcDisplay').value);
-            } catch {
-                document.getElementById('calcDisplay').value = 'Error';
-            }
+            try { document.getElementById('calcDisplay').value = eval(document.getElementById('calcDisplay').value); }
+            catch { document.getElementById('calcDisplay').value = 'Error'; }
         }
 
-        // Notes Auto-save Logic
+        // Notes Auto-save
         document.getElementById('notesArea').value = localStorage.getItem('dawson_os_notes') || '';
-        function saveNotes() {
-            localStorage.setItem('dawson_os_notes', document.getElementById('notesArea').value);
-        }
+        function saveNotes() { localStorage.setItem('dawson_os_notes', document.getElementById('notesArea').value); }
     </script>
 
 </body>
-</html>
 </html>

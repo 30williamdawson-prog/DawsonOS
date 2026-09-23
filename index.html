@@ -129,7 +129,6 @@
         .search-box {
             width: 100%;
             max-width: 650px;
-            position: relative;
         }
 
         .search-input {
@@ -144,6 +143,43 @@
         }
 
         .search-input:focus { border-color: #f96332; }
+
+        /* --- Links Folder / Hub --- */
+        #links-app {
+            flex-direction: column;
+            padding: 25px;
+            gap: 20px;
+            overflow-y: auto;
+        }
+
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .link-card {
+            background: #1a1a20;
+            border: 1px solid #2d2d35;
+            padding: 20px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .link-card:hover {
+            transform: translateY(-3px);
+            border-color: #f96332;
+        }
+
+        .link-icon { font-size: 2rem; }
 
         /* --- Consolidated Game Hub --- */
         #games-app {
@@ -215,10 +251,11 @@
             cursor: pointer;
         }
 
-        /* --- AI Assistant --- */
+        /* --- Dawson AI Assistant --- */
         #ai-app {
             flex-direction: column;
             padding: 20px;
+            height: 100%;
         }
 
         .chat-box {
@@ -237,8 +274,9 @@
         .chat-msg {
             padding: 10px 14px;
             border-radius: 8px;
-            max-width: 75%;
+            max-width: 80%;
             font-size: 0.95rem;
+            line-height: 1.4;
         }
 
         .user-msg { background: #f96332; align-self: flex-end; }
@@ -295,7 +333,7 @@
             <button class="app-btn" onclick="openApp('browser')">🌐 Search Bar</button>
             <button class="app-btn" onclick="openApp('ai')">🤖 Dawson AI</button>
             <button class="app-btn" onclick="openApp('games')">🎮 Game Center</button>
-            <button class="app-btn" onclick="openApp('youtube')">▶️ YouTube</button>
+            <button class="app-btn" onclick="openApp('links')">📁 Web Links</button>
             
             <h2>Tools</h2>
             <button class="app-btn" onclick="openApp('notes')">📝 Quick Notes</button>
@@ -315,7 +353,40 @@
                 </div>
             </div>
 
-            <!-- Single Consolidated Game Hub -->
+            <!-- Links Folder / Hub -->
+            <div id="links-app" class="app-screen">
+                <h2>📁 External Links Folder</h2>
+                <p style="color:#888899;">Quick access launcher for external web tools and platforms:</p>
+                
+                <div class="links-grid">
+                    <div class="link-card" onclick="window.open('https://play.geforcenow.com', '_blank')">
+                        <span class="link-icon">🎮</span>
+                        <strong>GeForce NOW</strong>
+                    </div>
+                    <div class="link-card" onclick="window.open('https://youtube.com', '_blank')">
+                        <span class="link-icon">▶️</span>
+                        <strong>YouTube</strong>
+                    </div>
+                    <div class="link-card" onclick="window.open('https://discord.com/app', '_blank')">
+                        <span class="link-icon">💬</span>
+                        <strong>Discord</strong>
+                    </div>
+                    <div class="link-card" onclick="window.open('https://open.spotify.com', '_blank')">
+                        <span class="link-icon">🎵</span>
+                        <strong>Spotify</strong>
+                    </div>
+                    <div class="link-card" onclick="window.open('https://twitch.tv', '_blank')">
+                        <span class="link-icon">🟣</span>
+                        <strong>Twitch</strong>
+                    </div>
+                    <div class="link-card" onclick="window.open('https://github.com', '_blank')">
+                        <span class="link-icon">🐙</span>
+                        <strong>GitHub</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Consolidated Game Hub -->
             <div id="games-app" class="app-screen">
                 <div class="game-bar">
                     <button class="game-nav-btn" onclick="switchGame('sub-snake')">🐍 Snake</button>
@@ -346,20 +417,13 @@
                 </div>
             </div>
 
-            <!-- YouTube App -->
-            <div id="youtube-app" class="app-screen" style="flex-direction:column; align-items:center; justify-center; padding:40px; text-align:center;">
-                <h2>YouTube Launcher</h2>
-                <p style="margin: 15px 0;">Open YouTube safely in a new tab:</p>
-                <button class="launch-btn" onclick="window.open('https://youtube.com', '_blank')">Open YouTube</button>
-            </div>
-
-            <!-- AI Chatbot -->
+            <!-- Dawson AI App -->
             <div id="ai-app" class="app-screen">
-                <h2>Dawson AI</h2>
+                <h2>🤖 Dawson AI</h2>
                 <div class="chat-box" id="chatBox">
-                    <div class="chat-msg ai-msg">Hello! I am Dawson AI. How can I help you?</div>
+                    <div class="chat-msg ai-msg">Hello! I am Dawson AI. Ready to chat about anything.</div>
                 </div>
-                <input type="text" id="chatInput" class="chat-input" placeholder="Type a message and hit Enter..." onkeydown="sendAiMessage(event)">
+                <input type="text" id="chatInput" class="chat-input" placeholder="Type anything and press Enter..." onkeydown="sendAiMessage(event)">
             </div>
 
             <!-- Calculator -->
@@ -437,19 +501,44 @@
             }
         }
 
-        // AI Bot
+        // Responsive Dawson AI Logic
         function sendAiMessage(e) {
             if (e.key === 'Enter') {
                 const input = document.getElementById('chatInput');
                 const msg = input.value.trim();
                 if(!msg) return;
+
                 const chatBox = document.getElementById('chatBox');
                 chatBox.innerHTML += `<div class="chat-msg user-msg">${msg}</div>`;
                 input.value = '';
+
                 setTimeout(() => {
-                    chatBox.innerHTML += `<div class="chat-msg ai-msg">Dawson OS Assistant active. How can I help?</div>`;
+                    const lower = msg.toLowerCase();
+                    let reply = "";
+
+                    if (lower.includes("i love you")) {
+                        reply = "I appreciate that! Dawson OS is happy to have you here. ❤️";
+                    } else if (lower.includes("i own you")) {
+                        reply = "Indeed! You are the administrator of Dawson OS.";
+                    } else if (lower.includes("hello") || lower.includes("hi") || lower.includes("hey")) {
+                        reply = "Greetings! What are we building or testing today?";
+                    } else if (lower.includes("who made you") || lower.includes("creator")) {
+                        reply = "I am the built-in system assistant for Dawson OS!";
+                    } else if (lower.includes("game") || lower.includes("play")) {
+                        reply = "Check out the Game Center in the sidebar for Snake and Tic-Tac-Toe!";
+                    } else {
+                        const defaultResponses = [
+                            `I hear you! Regarding "${msg}", how can I assist further?`,
+                            "All systems running smoothly in Dawson OS.",
+                            "Command acknowledged. Let me know if you need tools, games, or notes!",
+                            "I'm here to help with whatever you need on Dawson OS."
+                        ];
+                        reply = defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+                    }
+
+                    chatBox.innerHTML += `<div class="chat-msg ai-msg">${reply}</div>`;
                     chatBox.scrollTop = chatBox.scrollHeight;
-                }, 400);
+                }, 300);
             }
         }
 

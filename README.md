@@ -18,7 +18,7 @@ Dawson OS is a lightweight, web-based operating system dashboard designed to run
 ## 🚀 Live Demo
 
 You can view the live site hosted on GitHub Pages here:  
-`https://<your-github-username>.github.io/DawsonOS/`
+(https://30williamdawson-prog.github.io/DawsonOS/)
 
 ## ⚙️ Local Setup
 

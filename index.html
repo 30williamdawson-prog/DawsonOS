@@ -5,72 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dawson OS Desktop</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            user-select: none;
-        }
-
-        body {
-            background: radial-gradient(circle at center, #1b1b24 0%, #0d0d11 100%);
-            color: #ffffff;
-            height: 100vh;
-            overflow: hidden;
-            position: relative;
-        }
-
-        /* --- Desktop Shortcuts Grid --- */
-        .desktop-grid {
-            display: grid;
-            grid-template-rows: repeat(auto-fill, 100px);
-            grid-auto-flow: column;
-            gap: 15px;
-            padding: 20px;
-            height: calc(100vh - 45px);
-            width: max-content;
-        }
-
-        .desktop-icon {
-            width: 85px;
-            height: 90px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-            cursor: pointer;
-            text-align: center;
-            padding: 5px;
-            transition: background 0.2s;
-        }
-
-        .desktop-icon:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .desktop-icon .icon {
-            font-size: 2.2rem;
-            margin-bottom: 5px;
-        }
-
-        .desktop-icon span {
-            font-size: 0.8rem;
-            color: #d1d1e0;
-            text-shadow: 1px 1px 2px #000;
-        }
-
-        /* --- Taskbar & Start Menu --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; user-select: none; }
+        body { background: #111; color: #fff; height: 100vh; overflow: hidden; position: relative; }
+        
+        /* Taskbar pinned to bottom */
         .taskbar {
             position: absolute;
             bottom: 0;
             left: 0;
             right: 0;
             height: 45px;
-            background: rgba(22, 22, 26, 0.9);
-            backdrop-filter: blur(12px);
-            border-top: 1px solid #23232a;
+            background: rgba(22, 22, 26, 0.95);
+            border-top: 1px solid #333;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -80,27 +26,12 @@
 
         .start-btn {
             background: #f96332;
-            color: #ffffff;
+            color: #fff;
             border: none;
             padding: 8px 16px;
             border-radius: 6px;
             font-weight: bold;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.9rem;
-            box-shadow: 0 2px 8px rgba(249, 99, 50, 0.3);
-        }
-
-        .start-btn:hover {
-            background: #e05223;
-        }
-
-        #clock {
-            font-size: 0.85rem;
-            color: #888899;
-            font-weight: 500;
         }
 
         .start-menu {
@@ -108,447 +39,40 @@
             position: absolute;
             bottom: 55px;
             left: 15px;
-            width: 280px;
-            background: #16161a;
-            border: 1px solid #2d2d35;
-            border-radius: 10px;
+            width: 250px;
+            background: #1a1a20;
+            border: 1px solid #333;
+            border-radius: 8px;
             padding: 15px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
             z-index: 1001;
-            flex-direction: column;
-            gap: 10px;
         }
 
-        .start-menu.active {
-            display: flex;
-        }
-
-        .start-menu h3 {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #666677;
-            margin-bottom: 5px;
-        }
-
-        .menu-item {
-            background: #1f1f24;
-            border: 1px solid #2d2d35;
-            padding: 10px;
-            border-radius: 6px;
-            color: #fff;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.9rem;
-        }
-
-        .menu-item:hover {
-            background: #f96332;
-        }
-
-        /* --- Windows / Folders --- */
-        .window {
-            display: none;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 600px;
-            height: 420px;
-            background: #121215;
-            border: 1px solid #2d2d35;
-            border-radius: 10px;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.7);
-            z-index: 100;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .window.active {
-            display: flex;
-        }
-
-        .window-header {
-            background: #16161a;
-            padding: 10px 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #23232a;
-        }
-
-        .window-title {
-            font-size: 0.9rem;
-            font-weight: 600;
-        }
-
-        .close-btn {
-            background: #2a2a35;
-            color: #aaa;
-            border: none;
-            width: 24px;
-            height: 24px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .close-btn:hover {
-            background: #ff4d4d;
-            color: #fff;
-        }
-
-        .window-body {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* --- Internal Content Styling --- */
-        .grid-folder {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-            gap: 15px;
-        }
-
-        .card {
-            background: #1a1a20;
-            border: 1px solid #2d2d35;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-            cursor: pointer;
-            transition: transform 0.2s, border-color 0.2s;
-        }
-
-        .card:hover {
-            transform: translateY(-3px);
-            border-color: #f96332;
-        }
-
-        .card-icon { font-size: 2rem; margin-bottom: 5px; }
-
-        .chat-box {
-            flex: 1;
-            background: #1a1a20;
-            border-radius: 8px;
-            padding: 15px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #2d2d35;
-        }
-
-        .chat-msg {
-            padding: 10px 14px;
-            border-radius: 8px;
-            max-width: 80%;
-            font-size: 0.9rem;
-        }
-
-        .user-msg { background: #f96332; align-self: flex-end; }
-        .ai-msg { background: #2b2b36; align-self: flex-start; }
-
-        .input-style {
-            width: 100%;
-            padding: 10px;
-            border-radius: 6px;
-            border: 1px solid #2d2d35;
-            background: #1a1a20;
-            color: white;
-            outline: none;
-        }
-
-        .launch-btn {
-            padding: 8px 16px;
-            background-color: #f96332;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .game-bar {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .board {
-            display: grid;
-            grid-template-columns: repeat(3, 70px);
-            grid-template-rows: repeat(3, 70px);
-            gap: 5px;
-            justify-content: center;
-        }
-
-        .cell {
-            width: 70px;
-            height: 70px;
-            background-color: #1a1a20;
-            border: 1px solid #2d2d35;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            font-weight: bold;
-            cursor: pointer;
-            border-radius: 6px;
-            color: #f96332;
-        }
+        .start-menu.active { display: block; }
+        .menu-item { padding: 8px; margin-top: 5px; background: #2a2a30; border-radius: 4px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <!-- Desktop Icons -->
-    <div class="desktop-grid">
-        <div class="desktop-icon" onclick="openWindow('links-win')">
-            <div class="icon">📁</div>
-            <span>Web Links</span>
-        </div>
-        <div class="desktop-icon" onclick="openWindow('games-win')">
-            <div class="icon">🎮</div>
-            <span>Game Center</span>
-        </div>
-        <div class="desktop-icon" onclick="openWindow('ai-win')">
-            <div class="icon">🤖</div>
-            <span>Dawson AI</span>
-        </div>
-        <div class="desktop-icon" onclick="openWindow('tools-win')">
-            <div class="icon">🧰</div>
-            <span>Tools Hub</span>
-        </div>
-    </div>
-
-    <!-- Taskbar -->
+    <!-- Taskbar and Start Button HTML -->
     <div class="taskbar">
-        <button class="start-btn" onclick="toggleStartMenu()">
-            <span>⚡</span> Dawson OS
-        </button>
-        <div id="clock">00:00:00</div>
+        <button class="start-btn" onclick="toggleStartMenu()">⚡ Dawson OS</button>
+        <div id="clock">00:00</div>
     </div>
 
-    <!-- Start Menu Pop-up -->
+    <!-- Start Menu -->
     <div class="start-menu" id="startMenu">
         <h3>Applications</h3>
-        <div class="menu-item" onclick="openWindow('links-win'); toggleStartMenu();">📁 External Links</div>
-        <div class="menu-item" onclick="openWindow('games-win'); toggleStartMenu();">🎮 Game Center</div>
-        <div class="menu-item" onclick="openWindow('ai-win'); toggleStartMenu();">🤖 Dawson AI</div>
-        <div class="menu-item" onclick="openWindow('tools-win'); toggleStartMenu();">🧰 Utilities & Tools</div>
-    </div>
-
-    <!-- Window 1: Web Links Folder -->
-    <div id="links-win" class="window">
-        <div class="window-header">
-            <span class="window-title">📁 Web Links Folder</span>
-            <button class="close-btn" onclick="closeWindow('links-win')">✕</button>
-        </div>
-        <div class="window-body">
-            <div class="grid-folder">
-                <div class="card" onclick="window.open('https://play.geforcenow.com', '_blank')">
-                    <div class="card-icon">🎮</div>
-                    <strong>GeForce NOW</strong>
-                </div>
-                <div class="card" onclick="window.open('https://youtube.com', '_blank')">
-                    <div class="card-icon">▶️</div>
-                    <strong>YouTube</strong>
-                </div>
-                <div class="card" onclick="window.open('https://discord.com/app', '_blank')">
-                    <div class="card-icon">💬</div>
-                    <strong>Discord</strong>
-                </div>
-                <div class="card" onclick="window.open('https://open.spotify.com', '_blank')">
-                    <div class="card-icon">🎵</div>
-                    <strong>Spotify</strong>
-                </div>
-                <div class="card" onclick="window.open('https://twitch.tv', '_blank')">
-                    <div class="card-icon">🟣</div>
-                    <strong>Twitch</strong>
-                </div>
-                <div class="card" onclick="window.open('https://github.com', '_blank')">
-                    <div class="card-icon">🐙</div>
-                    <strong>GitHub</strong>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Window 2: Game Center -->
-    <div id="games-win" class="window">
-        <div class="window-header">
-            <span class="window-title">🎮 Dawson Game Center</span>
-            <button class="close-btn" onclick="closeWindow('games-win')">✕</button>
-        </div>
-        <div class="window-body">
-            <div class="game-bar">
-                <button class="launch-btn" onclick="switchGame('snake-tab')">🐍 Snake</button>
-                <button class="launch-btn" onclick="switchGame('ttt-tab')">❌ Tic-Tac-Toe</button>
-            </div>
-            
-            <div id="snake-tab" class="game-tab" style="text-align:center;">
-                <canvas id="snakeCanvas" width="280" height="220" style="background:#1a1a20; border-radius:8px; margin-bottom:10px;"></canvas>
-                <div><button class="launch-btn" onclick="startSnake()">Start Snake</button></div>
-            </div>
-
-            <div id="ttt-tab" class="game-tab" style="display:none; text-align:center;">
-                <h4 id="status" style="margin-bottom:10px;">Player X's Turn</h4>
-                <div class="board">
-                    <div class="cell" onclick="makeMove(this, 0)"></div>
-                    <div class="cell" onclick="makeMove(this, 1)"></div>
-                    <div class="cell" onclick="makeMove(this, 2)"></div>
-                    <div class="cell" onclick="makeMove(this, 3)"></div>
-                    <div class="cell" onclick="makeMove(this, 4)"></div>
-                    <div class="cell" onclick="makeMove(this, 5)"></div>
-                    <div class="cell" onclick="makeMove(this, 6)"></div>
-                    <div class="cell" onclick="makeMove(this, 7)"></div>
-                    <div class="cell" onclick="makeMove(this, 8)"></div>
-                </div>
-                <button class="launch-btn" onclick="resetGame()" style="margin-top:10px;">Restart</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Window 3: Dawson AI -->
-    <div id="ai-win" class="window">
-        <div class="window-header">
-            <span class="window-title">🤖 Dawson AI</span>
-            <button class="close-btn" onclick="closeWindow('ai-win')">✕</button>
-        </div>
-        <div class="window-body">
-            <div class="chat-box" id="chatBox">
-                <div class="chat-msg ai-msg">Hello! Dawson AI ready to assist. Type anything!</div>
-            </div>
-            <input type="text" id="chatInput" class="input-style" placeholder="Ask or say something..." onkeydown="sendAiMessage(event)">
-        </div>
-    </div>
-
-    <!-- Window 4: Tools Hub -->
-    <div id="tools-win" class="window">
-        <div class="window-header">
-            <span class="window-title">🧰 Tools & Utilities</span>
-            <button class="close-btn" onclick="closeWindow('tools-win')">✕</button>
-        </div>
-        <div class="window-body" style="gap: 15px;">
-            <h3>Quick Notes</h3>
-            <textarea id="notesArea" class="input-style" style="height:120px; resize:none;" placeholder="Type notes here..." oninput="saveNotes()"></textarea>
-            
-            <h3>Search Web</h3>
-            <input type="text" class="input-style" placeholder="Search DuckDuckGo..." onkeydown="if(event.key==='Enter') window.open('https://duckduckgo.com/?q='+encodeURIComponent(this.value), '_blank')">
-        </div>
+        <div class="menu-item" onclick="alert('Opening Web Links')">📁 Web Links</div>
+        <div class="menu-item" onclick="alert('Opening Games')">🎮 Game Center</div>
     </div>
 
     <script>
-        // Clock
-        setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
-
-        // Window & Menu Controls
         function toggleStartMenu() {
             document.getElementById('startMenu').classList.toggle('active');
         }
-
-        function openWindow(id) {
-            document.querySelectorAll('.window').forEach(w => w.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-        }
-
-        function closeWindow(id) {
-            document.getElementById(id).classList.remove('active');
-        }
-
-        function switchGame(tabId) {
-            document.querySelectorAll('.game-tab').forEach(t => t.style.display = 'none');
-            document.getElementById(tabId).style.display = 'block';
-        }
-
-        // Responsive Dawson AI Logic
-        function sendAiMessage(e) {
-            if (e.key === 'Enter') {
-                const input = document.getElementById('chatInput');
-                const msg = input.value.trim();
-                if(!msg) return;
-
-                const chatBox = document.getElementById('chatBox');
-                chatBox.innerHTML += `<div class="chat-msg user-msg">${msg}</div>`;
-                input.value = '';
-
-                setTimeout(() => {
-                    const lower = msg.toLowerCase();
-                    let reply = "";
-
-                    if (lower.includes("i love you")) {
-                        reply = "I appreciate that! Dawson OS is happy to have you here. ❤️";
-                    } else if (lower.includes("i own you")) {
-                        reply = "Indeed! You are the administrator of Dawson OS.";
-                    } else if (lower.includes("hello") || lower.includes("hi") || lower.includes("hey")) {
-                        reply = "Greetings! What are we testing out today?";
-                    } else {
-                        const responses = [
-                            `Got it! Regarding "${msg}", how can I help?`,
-                            "All systems operating smoothly on Dawson OS.",
-                            "Command acknowledged!"
-                        ];
-                        reply = responses[Math.floor(Math.random() * responses.length)];
-                    }
-
-                    chatBox.innerHTML += `<div class="chat-msg ai-msg">${reply}</div>`;
-                    chatBox.scrollTop = chatBox.scrollHeight;
-                }, 300);
-            }
-        }
-
-        // Tic Tac Toe Game
-        let currentPlayer = 'X', boardState = ['', '', '', '', '', '', '', '', ''], gameActive = true;
-        const winningCombos = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-        function makeMove(cell, index) {
-            if (boardState[index] !== '' || !gameActive) return;
-            boardState[index] = currentPlayer; cell.innerText = currentPlayer;
-            if (winningCombos.some(c => c.every(i => boardState[i] === currentPlayer))) {
-                document.getElementById('status').innerText = `Player ${currentPlayer} Wins!`; gameActive = false; return;
-            }
-            if (!boardState.includes('')) { document.getElementById('status').innerText = "It's a Draw!"; gameActive = false; return; }
-            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-            document.getElementById('status').innerText = `Player ${currentPlayer}'s Turn`;
-        }
-        function resetGame() {
-            boardState = ['', '', '', '', '', '', '', '', '']; gameActive = true; currentPlayer = 'X';
-            document.getElementById('status').innerText = "Player X's Turn";
-            document.querySelectorAll('.cell').forEach(cell => cell.innerText = '');
-        }
-
-        // Snake Game
-        function startSnake() {
-            const canvas = document.getElementById('snakeCanvas');
-            const ctx = canvas.getContext('2d');
-            let snake = [{x: 140, y: 100}], food = {x: 60, y: 60}, dx = 20, dy = 0;
-            document.onkeydown = (e) => {
-                if (e.key === 'ArrowUp' && dy === 0) { dx = 0; dy = -20; }
-                if (e.key === 'ArrowDown' && dy === 0) { dx = 0; dy = 20; }
-                if (e.key === 'ArrowLeft' && dx === 0) { dx = -20; dy = 0; }
-                if (e.key === 'ArrowRight' && dx === 0) { dx = 20; dy = 0; }
-            };
-            let game = setInterval(() => {
-                let head = {x: snake[0].x + dx, y: snake[0].y + dy};
-                if(head.x < 0 || head.x >= 280 || head.y < 0 || head.y >= 220) { clearInterval(game); alert('Game Over!'); return; }
-                snake.unshift(head);
-                if(head.x === food.x && head.y === food.y) {
-                    food = {x: Math.floor(Math.random()*14)*20, y: Math.floor(Math.random()*10)*20};
-                } else { snake.pop(); }
-                ctx.fillStyle = '#1a1a20'; ctx.fillRect(0, 0, 280, 220);
-                ctx.fillStyle = '#f96332'; ctx.fillRect(food.x, food.y, 18, 18);
-                ctx.fillStyle = '#ffffff'; snake.forEach(part => ctx.fillRect(part.x, part.y, 18, 18));
-            }, 130);
-        }
-
-        // Notes
-        document.getElementById('notesArea').value = localStorage.getItem('dawson_os_notes') || '';
-        function saveNotes() { localStorage.setItem('dawson_os_notes', document.getElementById('notesArea').value); }
+        setInterval(() => { 
+            document.getElementById('clock').innerText = new Date().toLocaleTimeString(); 
+        }, 1000);
     </script>
 </body>
 </html>

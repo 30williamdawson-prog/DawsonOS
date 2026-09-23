@@ -1,78 +1,600 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dawson OS Desktop</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; user-select: none; }
-        body { background: #111; color: #fff; height: 100vh; overflow: hidden; position: relative; }
-        
-        /* Taskbar pinned to bottom */
+(function () {
+    const style = document.createElement('style');
+    style.textContent = `
+        :root {
+            --bg-dark: #0f0f13;
+            --panel-bg: rgba(22, 22, 28, 0.9);
+            --panel-solid: #16161c;
+            --accent-orange: #f96332;
+            --accent-hover: #e05223;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-main: #ffffff;
+            --text-muted: #8e8e9e;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            user-select: none;
+        }
+
+        body {
+            background: radial-gradient(circle at center, #1e1e28 0%, #0d0d12 100%);
+            color: var(--text-main);
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .desktop-grid {
+            display: grid;
+            grid-template-rows: repeat(auto-fill, 100px);
+            grid-auto-flow: column;
+            gap: 20px;
+            padding: 25px;
+            height: calc(100vh - 48px);
+            width: max-content;
+        }
+
+        .desktop-icon {
+            width: 90px;
+            height: 95px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: center;
+            padding: 8px;
+            transition: all 0.2s ease;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid transparent;
+        }
+
+        .desktop-icon:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .desktop-icon .icon {
+            font-size: 2.4rem;
+            margin-bottom: 6px;
+        }
+
+        .desktop-icon span {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #e1e1e8;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+        }
+
         .taskbar {
-            position: absolute;
+            position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
-            height: 45px;
-            background: rgba(22, 22, 26, 0.95);
-            border-top: 1px solid #333;
+            height: 48px;
+            background: var(--panel-bg);
+            backdrop-filter: blur(16px);
+            border-top: 1px solid var(--border-color);
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 0 15px;
-            z-index: 1000;
+            z-index: 9999;
         }
 
         .start-btn {
-            background: #f96332;
-            color: #fff;
+            background: linear-gradient(135deg, #f96332 0%, #d84315 100%);
+            color: #ffffff;
             border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-weight: bold;
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-weight: 700;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 12px rgba(249, 99, 50, 0.4);
+            transition: all 0.2s ease;
+        }
+
+        .start-btn:hover {
+            background: linear-gradient(135deg, #fb7447 0%, #e64a19 100%);
+            transform: scale(1.03);
+        }
+
+        #clock {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .start-menu {
             display: none;
-            position: absolute;
-            bottom: 55px;
+            position: fixed;
+            bottom: 58px;
             left: 15px;
-            width: 250px;
-            background: #1a1a20;
-            border: 1px solid #333;
+            width: 300px;
+            background: var(--panel-solid);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
+            z-index: 10000;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .start-menu.active {
+            display: flex;
+        }
+
+        .start-menu h3 {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .menu-item {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            padding: 12px 14px;
             border-radius: 8px;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.92rem;
+            transition: all 0.2s ease;
+        }
+
+        .menu-item:hover {
+            background: var(--accent-orange);
+            border-color: var(--accent-orange);
+            transform: translateX(4px);
+        }
+
+        .window {
+            display: none;
+            position: absolute;
+            top: 48%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 620px;
+            max-width: 92vw;
+            height: 480px;
+            max-height: 85vh;
+            background: #121217;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8);
+            z-index: 100;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .window.active {
+            display: flex;
+        }
+
+        .window-header {
+            background: #181820;
+            padding: 12px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .window-title {
+            font-size: 0.92rem;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: rgba(255, 255, 255, 0.08);
+            color: #aaa;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .close-btn:hover {
+            background: #ff4d4d;
+            color: #fff;
+        }
+
+        .window-body {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .grid-folder {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 16px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            padding: 18px 12px;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent-orange);
+            background: rgba(249, 99, 50, 0.08);
+        }
+
+        .card-icon { font-size: 2.2rem; margin-bottom: 8px; }
+
+        .chat-box {
+            flex: 1;
+            background: #181820;
+            border-radius: 10px;
             padding: 15px;
-            z-index: 1001;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
         }
 
-        .start-menu.active { display: block; }
-        .menu-item { padding: 8px; margin-top: 5px; background: #2a2a30; border-radius: 4px; cursor: pointer; }
-    </style>
-</head>
-<body>
-
-    <!-- Taskbar and Start Button HTML -->
-    <div class="taskbar">
-        <button class="start-btn" onclick="toggleStartMenu()">⚡ Dawson OS</button>
-        <div id="clock">00:00</div>
-    </div>
-
-    <!-- Start Menu -->
-    <div class="start-menu" id="startMenu">
-        <h3>Applications</h3>
-        <div class="menu-item" onclick="alert('Opening Web Links')">📁 Web Links</div>
-        <div class="menu-item" onclick="alert('Opening Games')">🎮 Game Center</div>
-    </div>
-
-    <script>
-        function toggleStartMenu() {
-            document.getElementById('startMenu').classList.toggle('active');
+        .chat-msg {
+            padding: 10px 14px;
+            border-radius: 10px;
+            max-width: 82%;
+            font-size: 0.9rem;
+            line-height: 1.4;
         }
-        setInterval(() => { 
-            document.getElementById('clock').innerText = new Date().toLocaleTimeString(); 
-        }, 1000);
-    </script>
-</body>
-</html>
+
+        .user-msg { background: var(--accent-orange); align-self: flex-end; color: #fff; }
+        .ai-msg { background: #252532; align-self: flex-start; color: #e1e1e8; border: 1px solid var(--border-color); }
+
+        .input-style {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: #181820;
+            color: white;
+            outline: none;
+            font-size: 0.9rem;
+        }
+
+        .launch-btn {
+            padding: 8px 18px;
+            background-color: var(--accent-orange);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .game-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 75px);
+            grid-template-rows: repeat(3, 75px);
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .cell {
+            width: 75px;
+            height: 75px;
+            background-color: #181820;
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 8px;
+            color: var(--accent-orange);
+        }
+    `;
+    document.head.appendChild(style);
+
+    const appContainer = document.createElement('div');
+    appContainer.id = 'dawson-os-root';
+    appContainer.innerHTML = `
+        <div class="desktop-grid">
+            <div class="desktop-icon" onclick="openWindow('links-win')">
+                <div class="icon">📁</div>
+                <span>Web Links</span>
+            </div>
+            <div class="desktop-icon" onclick="openWindow('games-win')">
+                <div class="icon">🎮</div>
+                <span>Game Center</span>
+            </div>
+            <div class="desktop-icon" onclick="openWindow('ai-win')">
+                <div class="icon">🤖</div>
+                <span>Dawson AI</span>
+            </div>
+            <div class="desktop-icon" onclick="openWindow('tools-win')">
+                <div class="icon">🧰</div>
+                <span>Tools Hub</span>
+            </div>
+        </div>
+
+        <div class="taskbar">
+            <button class="start-btn" onclick="toggleStartMenu()">
+                <span>⚡</span> Dawson OS
+            </button>
+            <div id="clock">00:00:00</div>
+        </div>
+
+        <div class="start-menu" id="startMenu">
+            <h3>Applications</h3>
+            <div class="menu-item" onclick="openWindow('links-win'); toggleStartMenu();">📁 Web Links Folder</div>
+            <div class="menu-item" onclick="openWindow('games-win'); toggleStartMenu();">🎮 Game Center</div>
+            <div class="menu-item" onclick="openWindow('ai-win'); toggleStartMenu();">🤖 Dawson AI</div>
+            <div class="menu-item" onclick="openWindow('tools-win'); toggleStartMenu();">🧰 Utilities & Notes</div>
+        </div>
+
+        <div id="links-win" class="window">
+            <div class="window-header">
+                <span class="window-title">📁 Web Links (DuckDuckGo Redirect)</span>
+                <button class="close-btn" onclick="closeWindow('links-win')">✕</button>
+            </div>
+            <div class="window-body">
+                <div class="grid-folder">
+                    <div class="card" onclick="launchViaDDG('GeForce NOW')">
+                        <div class="card-icon">🎮</div>
+                        <strong>GeForce NOW</strong>
+                    </div>
+                    <div class="card" onclick="launchViaDDG('YouTube')">
+                        <div class="card-icon">▶️</div>
+                        <strong>YouTube</strong>
+                    </div>
+                    <div class="card" onclick="launchViaDDG('Discord')">
+                        <div class="card-icon">💬</div>
+                        <strong>Discord</strong>
+                    </div>
+                    <div class="card" onclick="launchViaDDG('Spotify')">
+                        <div class="card-icon">🎵</div>
+                        <strong>Spotify</strong>
+                    </div>
+                    <div class="card" onclick="launchViaDDG('Twitch')">
+                        <div class="card-icon">🟣</div>
+                        <strong>Twitch</strong>
+                    </div>
+                    <div class="card" onclick="launchViaDDG('GitHub')">
+                        <div class="card-icon">🐙</div>
+                        <strong>GitHub</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="games-win" class="window">
+            <div class="window-header">
+                <span class="window-title">🎮 Dawson Game Center</span>
+                <button class="close-btn" onclick="closeWindow('games-win')">✕</button>
+            </div>
+            <div class="window-body">
+                <div class="game-bar">
+                    <button class="launch-btn" onclick="switchGame('snake-tab')">🐍 Snake</button>
+                    <button class="launch-btn" onclick="switchGame('ttt-tab')">❌ Tic-Tac-Toe</button>
+                </div>
+                
+                <div id="snake-tab" class="game-tab" style="text-align:center;">
+                    <canvas id="snakeCanvas" width="300" height="220" style="background:#181820; border-radius:8px; margin-bottom:12px; border: 1px solid var(--border-color);"></canvas>
+                    <div><button class="launch-btn" onclick="startSnake()">Start Snake</button></div>
+                </div>
+
+                <div id="ttt-tab" class="game-tab" style="display:none; text-align:center;">
+                    <h4 id="status" style="margin-bottom:12px;">Player X's Turn</h4>
+                    <div class="board">
+                        <div class="cell" onclick="makeMove(this, 0)"></div>
+                        <div class="cell" onclick="makeMove(this, 1)"></div>
+                        <div class="cell" onclick="makeMove(this, 2)"></div>
+                        <div class="cell" onclick="makeMove(this, 3)"></div>
+                        <div class="cell" onclick="makeMove(this, 4)"></div>
+                        <div class="cell" onclick="makeMove(this, 5)"></div>
+                        <div class="cell" onclick="makeMove(this, 6)"></div>
+                        <div class="cell" onclick="makeMove(this, 7)"></div>
+                        <div class="cell" onclick="makeMove(this, 8)"></div>
+                    </div>
+                    <button class="launch-btn" onclick="resetGame()" style="margin-top:15px;">Restart</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="ai-win" class="window">
+            <div class="window-header">
+                <span class="window-title">🤖 Dawson AI</span>
+                <button class="close-btn" onclick="closeWindow('ai-win')">✕</button>
+            </div>
+            <div class="window-body">
+                <div class="chat-box" id="chatBox">
+                    <div class="chat-msg ai-msg">Hello! Dawson AI ready to assist. Type anything below!</div>
+                </div>
+                <input type="text" id="chatInput" class="input-style" placeholder="Ask or say something..." onkeydown="sendAiMessage(event)">
+            </div>
+        </div>
+
+        <div id="tools-win" class="window">
+            <div class="window-header">
+                <span class="window-title">🧰 Utilities & Notes</span>
+                <button class="close-btn" onclick="closeWindow('tools-win')">✕</button>
+            </div>
+            <div class="window-body" style="gap: 15px;">
+                <h3>Quick Notes</h3>
+                <textarea id="notesArea" class="input-style" style="height:140px; resize:none;" placeholder="Type notes here..." oninput="saveNotes()"></textarea>
+                
+                <h3>DuckDuckGo Direct Search</h3>
+                <input type="text" class="input-style" placeholder="Search DuckDuckGo..." onkeydown="if(event.key==='Enter') window.open('https://duckduckgo.com/?q='+encodeURIComponent(this.value), '_blank')">
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(appContainer);
+
+    window.toggleStartMenu = function() {
+        document.getElementById('startMenu').classList.toggle('active');
+    };
+
+    window.openWindow = function(id) {
+        document.querySelectorAll('.window').forEach(w => w.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    };
+
+    window.closeWindow = function(id) {
+        document.getElementById(id).classList.remove('active');
+    };
+
+    window.switchGame = function(tabId) {
+        document.querySelectorAll('.game-tab').forEach(t => t.style.display = 'none');
+        document.getElementById(tabId).style.display = 'block';
+    };
+
+    window.launchViaDDG = function(query) {
+        const targetUrl = 'https://duckduckgo.com/?q=\\' + encodeURIComponent(query);
+        window.open(targetUrl, '_blank');
+    };
+
+    window.sendAiMessage = function(e) {
+        if (e.key === 'Enter') {
+            const input = document.getElementById('chatInput');
+            const msg = input.value.trim();
+            if (!msg) return;
+
+            const chatBox = document.getElementById('chatBox');
+            chatBox.innerHTML += `<div class="chat-msg user-msg">${msg}</div>`;
+            input.value = '';
+
+            setTimeout(() => {
+                const lower = msg.toLowerCase();
+                let reply = "";
+
+                if (lower.includes("i love you")) {
+                    reply = "I appreciate that! Dawson OS is glad to have you here. ❤️";
+                } else if (lower.includes("i own you")) {
+                    reply = "Indeed! You are the root administrator of Dawson OS.";
+                } else if (lower.includes("hello") || lower.includes("hi") || lower.includes("hey")) {
+                    reply = "Greetings! What are we working on today?";
+                } else {
+                    const responses = [
+                        `Acknowledged: "${msg}". How else can I assist?`,
+                        "All systems operational on Dawson OS.",
+                        "Command processed successfully."
+                    ];
+                    reply = responses[Math.floor(Math.random() * responses.length)];
+                }
+
+                chatBox.innerHTML += `<div class="chat-msg ai-msg">${reply}</div>`;
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }, 300);
+        }
+    };
+
+    let currentPlayer = 'X', boardState = ['', '', '', '', '', '', '', '', ''], gameActive = true;
+    const winningCombos = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+    
+    window.makeMove = function(cell, index) {
+        if (boardState[index] !== '' || !gameActive) return;
+        boardState[index] = currentPlayer;
+        cell.innerText = currentPlayer;
+        if (winningCombos.some(c => c.every(i => boardState[i] === currentPlayer))) {
+            document.getElementById('status').innerText = `Player ${currentPlayer} Wins!`;
+            gameActive = false;
+            return;
+        }
+        if (!boardState.includes('')) {
+            document.getElementById('status').innerText = "It's a Draw!";
+            gameActive = false;
+            return;
+        }
+        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+        document.getElementById('status').innerText = `Player ${currentPlayer}'s Turn`;
+    };
+
+    window.resetGame = function() {
+        boardState = ['', '', '', '', '', '', '', '', ''];
+        gameActive = true;
+        currentPlayer = 'X';
+        document.getElementById('status').innerText = "Player X's Turn";
+        document.querySelectorAll('.cell').forEach(cell => cell.innerText = '');
+    };
+
+    window.startSnake = function() {
+        const canvas = document.getElementById('snakeCanvas');
+        const ctx = canvas.getContext('2d');
+        let snake = [{x: 140, y: 100}], food = {x: 60, y: 60}, dx = 20, dy = 0;
+        document.onkeydown = (e) => {
+            if (e.key === 'ArrowUp' && dy === 0) { dx = 0; dy = -20; }
+            if (e.key === 'ArrowDown' && dy === 0) { dx = 0; dy = 20; }
+            if (e.key === 'ArrowLeft' && dx === 0) { dx = -20; dy = 0; }
+            if (e.key === 'ArrowRight' && dx === 0) { dx = 20; dy = 0; }
+        };
+        let game = setInterval(() => {
+            let head = {x: snake[0].x + dx, y: snake[0].y + dy};
+            if (head.x < 0 || head.x >= 300 || head.y < 0 || head.y >= 220) {
+                clearInterval(game);
+                alert('Game Over!');
+                return;
+            }
+            snake.unshift(head);
+            if (head.x === food.x && head.y === food.y) {
+                food = {x: Math.floor(Math.random()*15)*20, y: Math.floor(Math.random()*11)*20};
+            } else {
+                snake.pop();
+            }
+            ctx.fillStyle = '#181820';
+            ctx.fillRect(0, 0, 300, 220);
+            ctx.fillStyle = '#f96332';
+            ctx.fillRect(food.x, food.y, 18, 18);
+            ctx.fillStyle = '#ffffff';
+            snake.forEach(part => ctx.fillRect(part.x, part.y, 18, 18));
+        }, 130);
+    };
+
+    window.saveNotes = function() {
+        localStorage.setItem('dawson_os_notes', document.getElementById('notesArea').value);
+    };
+
+    setInterval(() => {
+        const clockEl = document.getElementById('clock');
+        if (clockEl) clockEl.innerText = new Date().toLocaleTimeString();
+    }, 1000);
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const notesArea = document.getElementById('notesArea');
+        if (notesArea) notesArea.value = localStorage.getItem('dawson_os_notes') || '';
+    });
+})();

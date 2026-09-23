@@ -9,12 +9,12 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
         body {
-            background: linear-gradient(135deg, #1e1e2e, #2a2a40);
-            color: #cdd6f4;
+            background-color: #0f0f12;
+            color: #ffffff;
             display: flex;
             flex-direction: column;
             height: 100vh;
@@ -22,108 +22,149 @@
         }
 
         header {
-            background-color: #11111b;
-            padding: 15px 20px;
+            background-color: #16161a;
+            padding: 12px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 2px solid #313244;
+            border-bottom: 1px solid #23232a;
         }
 
         header h1 {
-            font-size: 1.5rem;
-            color: #89b4fa;
+            font-size: 1.2rem;
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        #clock {
+            color: #888899;
+            font-size: 0.9rem;
         }
 
         .main-container {
             display: flex;
             flex: 1;
-            padding: 20px;
-            gap: 20px;
-            height: calc(100vh - 60px);
+            padding: 15px;
+            gap: 15px;
+            height: calc(100vh - 50px);
         }
 
         .sidebar {
-            width: 250px;
-            background-color: #181825;
+            width: 220px;
+            background-color: #16161a;
             padding: 15px;
-            border-radius: 10px;
+            border-radius: 8px;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 10px;
+            border: 1px solid #23232a;
         }
 
         .sidebar h2 {
-            font-size: 1.2rem;
-            color: #a6e3a1;
-            border-bottom: 1px solid #313244;
-            padding-bottom: 5px;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #666677;
+            margin-bottom: 5px;
         }
 
         .app-btn {
-            background-color: #313244;
-            color: #cdd6f4;
-            padding: 12px 15px;
+            background-color: #1f1f24;
+            color: #dddde8;
+            padding: 10px 12px;
             border-radius: 6px;
-            border: none;
+            border: 1px solid #2d2d35;
             cursor: pointer;
             text-align: left;
-            font-size: 1rem;
-            transition: background 0.2s;
+            font-size: 0.95rem;
+            transition: all 0.2s;
         }
 
         .app-btn:hover {
-            background-color: #45475a;
+            background-color: #2a2a32;
+            color: #ffffff;
         }
 
         .viewport {
             flex: 1;
-            background-color: #181825;
-            border-radius: 10px;
+            background-color: #121215;
+            border-radius: 8px;
             overflow: hidden;
             display: flex;
             flex-direction: column;
             position: relative;
-        }
-
-        .search-bar {
-            padding: 10px;
-            background-color: #11111b;
-            display: flex;
-            gap: 10px;
-        }
-
-        .search-bar input {
-            flex: 1;
-            padding: 10px;
-            border-radius: 4px;
-            border: 1px solid #45475a;
-            background-color: #313244;
-            color: #cdd6f4;
-        }
-
-        .search-bar button {
-            padding: 10px 20px;
-            background-color: #89b4fa;
-            border: none;
-            border-radius: 4px;
-            color: #11111b;
-            font-weight: bold;
-            cursor: pointer;
+            border: 1px solid #23232a;
         }
 
         .app-screen {
             display: none;
             width: 100%;
             height: 100%;
-            border: none;
         }
 
         .active {
             display: flex !important;
         }
 
-        /* Tic Tac Toe Game Styling */
+        /* --- Serum Browser Start Page --- */
+        #browser-app {
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #121215;
+            padding: 20px;
+        }
+
+        .browser-logo {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 30px;
+            letter-spacing: -1px;
+        }
+
+        .browser-logo span {
+            color: #f96332;
+        }
+
+        .search-box {
+            width: 100%;
+            max-width: 650px;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 20px;
+            color: #777788;
+            font-size: 1.1rem;
+            pointer-events: none;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 16px 20px 16px 50px;
+            border-radius: 30px;
+            border: 1px solid #2a2a35;
+            background-color: #1a1a20;
+            color: #ffffff;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s, background-color 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: #444455;
+            background-color: #1f1f28;
+        }
+
+        .search-input::placeholder {
+            color: #555566;
+        }
+
+        /* --- Tic Tac Toe --- */
         #tictactoe-app {
             flex-direction: column;
             align-items: center;
@@ -133,37 +174,39 @@
 
         .board {
             display: grid;
-            grid-template-columns: repeat(3, 100px);
-            grid-template-rows: repeat(3, 100px);
-            gap: 5px;
+            grid-template-columns: repeat(3, 90px);
+            grid-template-rows: repeat(3, 90px);
+            gap: 8px;
         }
 
         .cell {
-            width: 100px;
-            height: 100px;
-            background-color: #313244;
+            width: 90px;
+            height: 90px;
+            background-color: #1a1a20;
+            border: 1px solid #2d2d35;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2.5rem;
+            font-size: 2rem;
             font-weight: bold;
             cursor: pointer;
-            border-radius: 6px;
-            color: #89b4fa;
+            border-radius: 8px;
+            color: #f96332;
         }
 
         .cell:hover {
-            background-color: #45475a;
+            background-color: #24242e;
         }
 
         .reset-btn {
-            padding: 8px 16px;
-            background-color: #f38ba8;
-            color: #11111b;
+            padding: 8px 18px;
+            background-color: #f96332;
+            color: #ffffff;
             border: none;
-            border-radius: 4px;
-            font-weight: bold;
+            border-radius: 6px;
+            font-weight: 600;
             cursor: pointer;
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -177,26 +220,26 @@
     <div class="main-container">
         <!-- Sidebar Navigation -->
         <div class="sidebar">
-            <h2>Apps & Games</h2>
-            <button class="app-btn" onclick="openApp('browser')">🌐 Web Browser</button>
+            <h2>Applications</h2>
+            <button class="app-btn" onclick="openApp('browser')">🌐 Browser</button>
             <button class="app-btn" onclick="openApp('tictactoe')">❌ Tic-Tac-Toe</button>
         </div>
 
-        <!-- Main Display Viewport -->
+        <!-- Main Display Area -->
         <div class="viewport">
             
-            <!-- Browser View -->
-            <div id="browser-app" class="app-screen active" style="flex-direction: column;">
-                <div class="search-bar">
-                    <input type="text" id="urlInput" placeholder="Enter URL or search term...">
-                    <button onclick="navigate()">Go</button>
+            <!-- Custom Serum Browser Screen -->
+            <div id="browser-app" class="app-screen active">
+                <div class="browser-logo">Serum<span>•</span>Browser</div>
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="searchInput" class="search-input" placeholder="Search or paste a URL" onkeydown="handleSearch(event)">
                 </div>
-                <iframe id="webFrame" src="https://duckduckgo.com/" style="width:100%; height:100%; border:none;"></iframe>
             </div>
 
-            <!-- Tic-Tac-Toe View -->
+            <!-- Tic-Tac-Toe App Screen -->
             <div id="tictactoe-app" class="app-screen">
-                <h2 id="status">Player X's Turn</h2>
+                <h3 id="status">Player X's Turn</h3>
                 <div class="board">
                     <div class="cell" onclick="makeMove(this, 0)"></div>
                     <div class="cell" onclick="makeMove(this, 1)"></div>
@@ -215,7 +258,7 @@
     </div>
 
     <script>
-        // Clock Function
+        // Real-time Clock
         function updateClock() {
             const now = new Date();
             document.getElementById('clock').innerText = now.toLocaleTimeString();
@@ -223,22 +266,27 @@
         setInterval(updateClock, 1000);
         updateClock();
 
-        // App Switcher Function
+        // Switch active app
         function openApp(appName) {
             document.querySelectorAll('.app-screen').forEach(app => app.classList.remove('active'));
             document.getElementById(appName + '-app').classList.add('active');
         }
 
-        // Web Browser Search Function
-        function navigate() {
-            let input = document.getElementById('urlInput').value;
-            if (!input.startsWith('http://') && !input.startsWith('https://')) {
-                input = 'https://duckduckgo.com/?q=' + encodeURIComponent(input);
+        // Search bar handler (Opens search safely in a new tab to bypass iframe security blocks)
+        function handleSearch(event) {
+            if (event.key === 'Enter') {
+                const query = document.getElementById('searchInput').value.trim();
+                if (query) {
+                    if (query.startsWith('http://') || query.startsWith('https://')) {
+                        window.open(query, '_blank');
+                    } else {
+                        window.open('https://duckduckgo.com/?q=' + encodeURIComponent(query), '_blank');
+                    }
+                }
             }
-            document.getElementById('webFrame').src = input;
         }
 
-        // Tic Tac Toe Logic
+        // Tic Tac Toe Game Logic
         let currentPlayer = 'X';
         let boardState = ['', '', '', '', '', '', '', '', ''];
         let gameActive = true;

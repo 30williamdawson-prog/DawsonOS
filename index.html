@@ -4,67 +4,287 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dawson OS</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
         body {
-            font-family: 'Inter', sans-serif;
-            user-select: none;
+            background: linear-gradient(135deg, #1e1e2e, #2a2a40);
+            color: #cdd6f4;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
             overflow: hidden;
-            background-size: cover;
-            background-position: center;
-            transition: background-image 0.5s ease-in-out;
         }
 
-        .glass-panel {
-            background: rgba(24, 24, 37, 0.75);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        header {
+            background-color: #11111b;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #313244;
         }
 
-        .glass-taskbar {
-            background: rgba(17, 17, 27, 0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(255, 255, 255, 0.12);
+        header h1 {
+            font-size: 1.5rem;
+            color: #89b4fa;
         }
 
-        .window-shadow {
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+        .main-container {
+            display: flex;
+            flex: 1;
+            padding: 20px;
+            gap: 20px;
+            height: calc(100vh - 60px);
         }
 
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.2);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 3px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.4);
+        .sidebar {
+            width: 250px;
+            background-color: #181825;
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
 
-        .window-transition {
-            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease, width 0.2s ease, height 0.2s ease, top 0.2s ease, left 0.2s ease;
+        .sidebar h2 {
+            font-size: 1.2rem;
+            color: #a6e3a1;
+            border-bottom: 1px solid #313244;
+            padding-bottom: 5px;
+        }
+
+        .app-btn {
+            background-color: #313244;
+            color: #cdd6f4;
+            padding: 12px 15px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            text-align: left;
+            font-size: 1rem;
+            transition: background 0.2s;
+        }
+
+        .app-btn:hover {
+            background-color: #45475a;
+        }
+
+        .viewport {
+            flex: 1;
+            background-color: #181825;
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .search-bar {
+            padding: 10px;
+            background-color: #11111b;
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #45475a;
+            background-color: #313244;
+            color: #cdd6f4;
+        }
+
+        .search-bar button {
+            padding: 10px 20px;
+            background-color: #89b4fa;
+            border: none;
+            border-radius: 4px;
+            color: #11111b;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .app-screen {
+            display: none;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .active {
+            display: flex !important;
+        }
+
+        /* Tic Tac Toe Game Styling */
+        #tictactoe-app {
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 5px;
+        }
+
+        .cell {
+            width: 100px;
+            height: 100px;
+            background-color: #313244;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 6px;
+            color: #89b4fa;
+        }
+
+        .cell:hover {
+            background-color: #45475a;
+        }
+
+        .reset-btn {
+            padding: 8px 16px;
+            background-color: #f38ba8;
+            color: #11111b;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
         }
     </style>
 </head>
-<body id="desktop" class="h-screen w-screen relative overflow-hidden bg-slate-900 text-slate-100" style="background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1920&auto=format&fit=crop');">
+<body>
 
-    <div id="desktop-grid" class="absolute inset-0 p-4 grid grid-flow-col auto-cols-max grid-rows-6 gap-6 z-0">
-        <!-- Desktop App Icons will be populated dynamically -->
+    <header>
+        <h1>Dawson OS</h1>
+        <div id="clock">00:00:00</div>
+    </header>
+
+    <div class="main-container">
+        <!-- Sidebar Navigation -->
+        <div class="sidebar">
+            <h2>Apps & Games</h2>
+            <button class="app-btn" onclick="openApp('browser')">🌐 Web Browser</button>
+            <button class="app-btn" onclick="openApp('tictactoe')">❌ Tic-Tac-Toe</button>
+        </div>
+
+        <!-- Main Display Viewport -->
+        <div class="viewport">
+            
+            <!-- Browser View -->
+            <div id="browser-app" class="app-screen active" style="flex-direction: column;">
+                <div class="search-bar">
+                    <input type="text" id="urlInput" placeholder="Enter URL or search term...">
+                    <button onclick="navigate()">Go</button>
+                </div>
+                <iframe id="webFrame" src="https://duckduckgo.com/" style="width:100%; height:100%; border:none;"></iframe>
+            </div>
+
+            <!-- Tic-Tac-Toe View -->
+            <div id="tictactoe-app" class="app-screen">
+                <h2 id="status">Player X's Turn</h2>
+                <div class="board">
+                    <div class="cell" onclick="makeMove(this, 0)"></div>
+                    <div class="cell" onclick="makeMove(this, 1)"></div>
+                    <div class="cell" onclick="makeMove(this, 2)"></div>
+                    <div class="cell" onclick="makeMove(this, 3)"></div>
+                    <div class="cell" onclick="makeMove(this, 4)"></div>
+                    <div class="cell" onclick="makeMove(this, 5)"></div>
+                    <div class="cell" onclick="makeMove(this, 6)"></div>
+                    <div class="cell" onclick="makeMove(this, 7)"></div>
+                    <div class="cell" onclick="makeMove(this, 8)"></div>
+                </div>
+                <button class="reset-btn" onclick="resetGame()">Restart Game</button>
+            </div>
+
+        </div>
     </div>
 
-    <div id="window-layer" class="absolute inset-0 pb-12 pointer-events-none z-10">
-        <!-- Dynamic Windows render here -->
-    </div>
+    <script>
+        // Clock Function
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toLocaleTimeString();
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
 
-    <div id="start-menu" class="hidden absolute bottom-14 left-3 w-80 sm:w-96 glass-panel rounded-2xl
+        // App Switcher Function
+        function openApp(appName) {
+            document.querySelectorAll('.app-screen').forEach(app => app.classList.remove('active'));
+            document.getElementById(appName + '-app').classList.add('active');
+        }
+
+        // Web Browser Search Function
+        function navigate() {
+            let input = document.getElementById('urlInput').value;
+            if (!input.startsWith('http://') && !input.startsWith('https://')) {
+                input = 'https://duckduckgo.com/?q=' + encodeURIComponent(input);
+            }
+            document.getElementById('webFrame').src = input;
+        }
+
+        // Tic Tac Toe Logic
+        let currentPlayer = 'X';
+        let boardState = ['', '', '', '', '', '', '', '', ''];
+        let gameActive = true;
+
+        const winningCombos = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8],
+            [0, 3, 6], [1, 4, 7], [2, 5, 8],
+            [0, 4, 8], [2, 4, 6]
+        ];
+
+        function makeMove(cell, index) {
+            if (boardState[index] !== '' || !gameActive) return;
+
+            boardState[index] = currentPlayer;
+            cell.innerText = currentPlayer;
+
+            if (checkWin()) {
+                document.getElementById('status').innerText = `Player ${currentPlayer} Wins!`;
+                gameActive = false;
+                return;
+            }
+
+            if (!boardState.includes('')) {
+                document.getElementById('status').innerText = "It's a Draw!";
+                gameActive = false;
+                return;
+            }
+
+            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            document.getElementById('status').innerText = `Player ${currentPlayer}'s Turn`;
+        }
+
+        function checkWin() {
+            return winningCombos.some(combo => {
+                return combo.every(index => boardState[index] === currentPlayer);
+            });
+        }
+
+        function resetGame() {
+            boardState = ['', '', '', '', '', '', '', '', ''];
+            gameActive = true;
+            currentPlayer = 'X';
+            document.getElementById('status').innerText = "Player X's Turn";
+            document.querySelectorAll('.cell').forEach(cell => cell.innerText = '');
+        }
+    </script>
+
+</body>
+</html>

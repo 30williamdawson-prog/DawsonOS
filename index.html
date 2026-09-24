@@ -1,220 +1,1007 @@
-// ==========================================
-// DAWSON OS - CORE SYSTEM SCRIPT
-// ==========================================
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dawson OS</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
 
-document.addEventListener('DOMContentLoaded', () => {
-  initClock();
-  initWindowManager();
-  initNotepad();
-  initCalculator();
-  initPaintApp();
-});
+        body {
+            background: radial-gradient(circle at center, #1b1b24 0%, #0d0d11 100%);
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
 
-/* --- 1. SYSTEM CLOCK --- */
-function initClock() {
-  const clockElement = document.getElementById('taskbar-clock');
-  if (!clockElement) return;
+        header {
+            background-color: rgba(22, 22, 26, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #23232a;
+        }
 
-  function updateTime() {
-    const now = new Date();
-    clockElement.innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  }
+        header h1 {
+            font-size: 1.2rem;
+            color: #ffffff;
+            font-weight: 600;
+        }
 
-  updateTime();
-  setInterval(updateTime, 1000);
-}
+        #clock {
+            color: #888899;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
 
-/* --- 2. WINDOW MANAGEMENT & DRAGGING --- */
-let activeZIndex = 100;
+        .main-container {
+            display: flex;
+            flex: 1;
+            padding: 15px;
+            gap: 15px;
+            height: calc(100vh - 50px);
+            overflow: hidden;
+        }
 
-function initWindowManager() {
-  const windows = document.querySelectorAll('.os-window');
+        .sidebar {
+            width: 220px;
+            background-color: #16161a;
+            padding: 15px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            border: 1px solid #23232a;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
 
-  windows.forEach(win => {
-    // Bring window to front on click
-    win.addEventListener('mousedown', () => {
-      activeZIndex++;
-      win.style.zIndex = activeZIndex;
-    });
+        .sidebar h2 {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: #666677;
+            margin-top: 10px;
+            margin-bottom: 5px;
+        }
 
-    // Make window draggable via header
-    const header = win.querySelector('.window-header');
-    if (header) {
-      makeElementDraggable(win, header);
-    }
+        .app-btn {
+            background-color: #1f1f24;
+            color: #dddde8;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid #2d2d35;
+            cursor: pointer;
+            text-align: left;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
 
-    // Close button event
-    const closeBtn = win.querySelector('.btn-close');
-    if (closeBtn) {
-      closeBtn.addEventListener('click', () => {
-        win.style.display = 'none';
-      });
-    }
-  });
-}
+        .app-btn:hover, .app-btn.active-nav {
+            background-color: #f96332;
+            color: #ffffff;
+            border-color: #f96332;
+        }
 
-function openWindow(windowId) {
-  const win = document.getElementById(windowId);
-  if (win) {
-    win.style.display = 'block';
-    activeZIndex++;
-    win.style.zIndex = activeZIndex;
-  }
-}
+        .viewport {
+            flex: 1;
+            background-color: #121215;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            border: 1px solid #23232a;
+        }
 
-function makeElementDraggable(elmnt, handle) {
-  let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+        .app-screen {
+            display: none;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+        }
 
-  handle.onmousedown = dragMouseDown;
+        .active {
+            display: flex !important;
+        }
 
-  function dragMouseDown(e) {
-    e = e || window.event;
-    e.preventDefault();
-    pos3 = e.clientX;
-    pos4 = e.clientY;
-    document.onmouseup = closeDragElement;
-    document.onmousemove = elementDrag;
-  }
+        /* --- Dawson OS Home Search --- */
+        #browser-app {
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
 
-  function elementDrag(e) {
-    e = e || window.event;
-    e.preventDefault();
-    pos1 = pos3 - e.clientX;
-    pos2 = pos4 - e.clientY;
-    pos3 = e.clientX;
-    pos4 = e.clientY;
-    elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
-    elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
-  }
+        .browser-logo {
+            font-size: 3.2rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 30px;
+            letter-spacing: -0.5px;
+        }
 
-  function closeDragElement() {
-    document.onmouseup = null;
-    document.onmousemove = null;
-  }
-}
+        .browser-logo span { color: #f96332; }
 
-/* --- 3. NOTEPAD APP (LOCAL STORAGE) --- */
-function initNotepad() {
-  const notepadArea = document.getElementById('notepad-textarea');
-  if (!notepadArea) return;
+        .search-box {
+            width: 100%;
+            max-width: 650px;
+        }
 
-  // Load saved note on startup
-  const savedNote = localStorage.getItem('dawson_os_note');
-  if (savedNote) {
-    notepadArea.value = savedNote;
-  }
+        .search-input {
+            width: 100%;
+            padding: 16px 20px;
+            border-radius: 30px;
+            border: 1px solid #2a2a35;
+            background-color: #1a1a20;
+            color: #ffffff;
+            font-size: 1rem;
+            outline: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: border-color 0.2s;
+        }
 
-  // Auto-save changes
-  notepadArea.addEventListener('input', () => {
-    localStorage.setItem('dawson_os_note', notepadArea.value);
-  });
-}
+        .search-input:focus { border-color: #f96332; }
 
-/* --- 4. CALCULATOR APP --- */
-let calcDisplayValue = "0";
+        /* --- External Web Links Hub --- */
+        #links-app {
+            flex-direction: column;
+            padding: 25px;
+            gap: 20px;
+            overflow-y: auto;
+        }
 
-function initCalculator() {
-  updateCalcDisplay();
-}
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
 
-function calcInput(num) {
-  if (calcDisplayValue === "0") {
-    calcDisplayValue = num.toString();
-  } else {
-    calcDisplayValue += num.toString();
-  }
-  updateCalcDisplay();
-}
+        .link-card {
+            background: #1a1a20;
+            border: 1px solid #2d2d35;
+            padding: 20px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s;
+        }
 
-function calcOperator(op) {
-  calcDisplayValue += ` ${op} `;
-  updateCalcDisplay();
-}
+        .link-card:hover {
+            transform: translateY(-3px);
+            border-color: #f96332;
+        }
 
-function calcClear() {
-  calcDisplayValue = "0";
-  updateCalcDisplay();
-}
+        .link-icon { font-size: 2rem; }
 
-function calcEquals() {
-  try {
-    const result = eval(calcDisplayValue.replace(/×/g, '*').replace(/÷/g, '/'));
-    calcDisplayValue = String(result);
-  } catch (err) {
-    calcDisplayValue = "Error";
-  }
-  updateCalcDisplay();
-}
+        /* --- Consolidated Game Hub --- */
+        #games-app {
+            flex-direction: column;
+            padding: 20px;
+            gap: 15px;
+            overflow-y: auto;
+        }
 
-function updateCalcDisplay() {
-  const display = document.getElementById('calc-display');
-  if (display) {
-    display.innerText = calcDisplayValue;
-  }
-}
+        .game-bar {
+            display: flex;
+            gap: 8px;
+            background: #1a1a20;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #2d2d35;
+            flex-wrap: wrap;
+        }
 
-/* --- 5. DAWSON PAINT APP --- */
-function initPaintApp() {
-  const canvas = document.getElementById('paint-canvas');
-  if (!canvas) return;
+        .game-nav-btn {
+            padding: 8px 14px;
+            background: #24242e;
+            color: white;
+            border: 1px solid #2d2d35;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: background-color 0.2s;
+        }
 
-  const ctx = canvas.getContext('2d');
-  let isDrawing = false;
-  let currentColor = '#000000';
-  let brushSize = 5;
+        .game-nav-btn:hover, .game-nav-btn.active-game-tab {
+            background: #f96332;
+            border-color: #f96332;
+        }
 
-  // Set default background color
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+        .game-view {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: #16161a;
+            border-radius: 10px;
+            border: 1px solid #23232a;
+            padding: 15px;
+        }
 
-  // Event handlers
-  canvas.addEventListener('mousedown', startDrawing);
-  canvas.addEventListener('mousemove', draw);
-  canvas.addEventListener('mouseup', stopDrawing);
-  canvas.addEventListener('mouseout', stopDrawing);
+        .game-active { display: flex !important; }
 
-  const colorPicker = document.getElementById('paint-color');
-  if (colorPicker) {
-    colorPicker.addEventListener('change', (e) => currentColor = e.target.value);
-  }
+        .game-status-bar {
+            margin-bottom: 12px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #dddde8;
+        }
 
-  const sizePicker = document.getElementById('paint-size');
-  if (sizePicker) {
-    sizePicker.addEventListener('change', (e) => brushSize = e.target.value);
-  }
+        .launch-btn {
+            padding: 10px 20px;
+            background-color: #f96332;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
 
-  function startDrawing(e) {
-    isDrawing = true;
-    draw(e);
-  }
+        .launch-btn:hover { opacity: 0.9; }
 
-  function draw(e) {
-    if (!isDrawing) return;
+        /* Tic-Tac-Toe Specifics */
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 80px);
+            grid-template-rows: repeat(3, 80px);
+            gap: 8px;
+        }
 
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+        .cell {
+            width: 80px;
+            height: 80px;
+            background-color: #1a1a20;
+            border: 1px solid #2d2d35;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 8px;
+            color: #f96332;
+        }
 
-    ctx.lineWidth = brushSize;
-    ctx.lineCap = 'round';
-    ctx.strokeStyle = currentColor;
+        /* Memory Match Game Specifics */
+        .memory-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 70px);
+            grid-template-rows: repeat(4, 70px);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
 
-    ctx.lineTo(x, y);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-  }
+        .memory-card {
+            width: 70px;
+            height: 70px;
+            background-color: #24242e;
+            border: 1px solid #2d2d35;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            cursor: pointer;
+            user-select: none;
+            transition: transform 0.2s, background-color 0.2s;
+        }
 
-  function stopDrawing() {
-    isDrawing = false;
-    ctx.beginPath();
-  }
-}
+        .memory-card.flipped {
+            background-color: #1a1a20;
+            border-color: #f96332;
+        }
 
-function clearCanvas() {
-  const canvas = document.getElementById('paint-canvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-}
+        /* --- Dawson AI Assistant --- */
+        #ai-app {
+            flex-direction: column;
+            padding: 20px;
+            height: 100%;
+        }
+
+        .chat-box {
+            flex: 1;
+            background: #1a1a20;
+            border-radius: 8px;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #2d2d35;
+        }
+
+        .chat-msg {
+            padding: 10px 14px;
+            border-radius: 8px;
+            max-width: 80%;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .user-msg { background: #f96332; align-self: flex-end; color: #fff; }
+        .ai-msg { background: #2b2b36; align-self: flex-start; color: #eee; }
+
+        .chat-input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #2d2d35;
+            background: #1a1a20;
+            color: white;
+            outline: none;
+        }
+
+        /* --- Utility Tools --- */
+        #calculator-app, #paint-app, #stopwatch-app {
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        #notes-app {
+            flex-direction: column;
+            padding: 20px;
+            gap: 10px;
+            height: 100%;
+        }
+
+        #notesArea {
+            width: 100%;
+            flex: 1;
+            background-color: #1a1a20;
+            border: 1px solid #2d2d35;
+            border-radius: 8px;
+            padding: 15px;
+            color: #ffffff;
+            outline: none;
+            resize: none;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        canvas {
+            touch-action: none;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Dawson OS</h1>
+        <div id="clock">00:00:00</div>
+    </header>
+
+    <div class="main-container">
+        <!-- Sidebar Navigation -->
+        <div class="sidebar">
+            <h2>System Apps</h2>
+            <button class="app-btn active-nav" onclick="openApp('browser', this)">🌐 Search Bar</button>
+            <button class="app-btn" onclick="openApp('ai', this)">🤖 Dawson AI</button>
+            <button class="app-btn" onclick="openApp('games', this)">🎮 Game Center</button>
+            <button class="app-btn" onclick="openApp('links', this)">📁 Web Links</button>
+            
+            <h2>Tools</h2>
+            <button class="app-btn" onclick="openApp('notes', this)">📝 Quick Notes</button>
+            <button class="app-btn" onclick="openApp('calculator', this)">🧮 Calculator</button>
+            <button class="app-btn" onclick="openApp('paint', this)">🎨 Canvas Paint</button>
+            <button class="app-btn" onclick="openApp('stopwatch', this)">⏱️ Stopwatch</button>
+        </div>
+
+        <!-- Main Display Viewport -->
+        <div class="viewport">
+            
+            <!-- Home Search -->
+            <div id="browser-app" class="app-screen active">
+                <div class="browser-logo">Dawson<span>•</span>OS</div>
+                <div class="search-box">
+                    <input type="text" id="searchInput" class="search-input" placeholder="Search DuckDuckGo or type a command..." onkeydown="handleSearch(event)">
+                </div>
+            </div>
+
+            <!-- External Links Folder -->
+            <div id="links-app" class="app-screen">
+                <h2>📁 External Web Links Folder</h2>
+                <p style="color:#888899;">Quick access launcher for essential web tools and services:</p>
+                
+                <div class="links-grid">
+                    <div class="link-card" onclick="window.open('https://duckduckgo.com', '_blank')">
+                        <span class="link-icon">🦆</span>
+                        <strong>DuckDuckGo</strong>
+                    </div>
+                    <div class="link-card" onclick="window.open('https://youtube.com', '_blank')">
+                        <span class="link-icon">▶️</span>
+                        <strong>YouTube</strong>
+                    </div>
+                    <div class="link-card" onclick="window.open('https://discord.com/app', '_blank')">
+                        <span class="link-icon">💬</span>
+                        <strong>Discord</strong>
+                    </div>
+                    <div class="link-card" onclick="window.open('https://open.spotify.com', '_blank')">
+                        <span class="link-icon">🎵</span>
+                        <strong>Spotify</strong>
+                    </div>
+                    <div class="link-card" onclick="window.open('https://twitch.tv', '_blank')">
+                        <span class="link-icon">🟣</span>
+                        <strong>Twitch</strong>
+                    </div>
+                    <div class="link-card" onclick="window.open('https://github.com', '_blank')">
+                        <span class="link-icon">🐙</span>
+                        <strong>GitHub</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Consolidated Multi-Game Hub -->
+            <div id="games-app" class="app-screen">
+                <div class="game-bar">
+                    <button class="game-nav-btn active-game-tab" onclick="switchGame('sub-snake', this)">🐍 Snake</button>
+                    <button class="game-nav-btn" onclick="switchGame('sub-tictactoe', this)">❌ Tic-Tac-Toe</button>
+                    <button class="game-nav-btn" onclick="switchGame('sub-pong', this)">🏓 Pong</button>
+                    <button class="game-nav-btn" onclick="switchGame('sub-memory', this)">🧠 Memory Match</button>
+                    <button class="game-nav-btn" onclick="switchGame('sub-breakout', this)">🧱 Breakout</button>
+                </div>
+
+                <!-- 1. Snake Game View -->
+                <div id="sub-snake" class="game-view game-active">
+                    <div class="game-status-bar" id="snakeStatus">Score: 0 | High Score: 0</div>
+                    <canvas id="snakeCanvas" width="360" height="360" style="background:#1a1a20; border-radius:8px; margin-bottom:12px;"></canvas>
+                    <button class="launch-btn" onclick="startSnake()">Start / Restart Snake</button>
+                </div>
+
+                <!-- 2. Tic-Tac-Toe View -->
+                <div id="sub-tictactoe" class="game-view">
+                    <div class="game-status-bar" id="status">Player X's Turn</div>
+                    <div style="margin-bottom: 10px;">
+                        <label style="color: #888899; font-size: 0.9rem; margin-right: 10px;">Mode:</label>
+                        <select id="tttMode" onchange="resetGame()" style="background: #1a1a20; color: white; border: 1px solid #2d2d35; padding: 4px 8px; border-radius: 4px;">
+                            <option value="pvp">2 Player (Local)</option>
+                            <option value="ai">Vs Computer AI</option>
+                        </select>
+                    </div>
+                    <div class="board">
+                        <div class="cell" onclick="makeMove(this, 0)"></div>
+                        <div class="cell" onclick="makeMove(this, 1)"></div>
+                        <div class="cell" onclick="makeMove(this, 2)"></div>
+                        <div class="cell" onclick="makeMove(this, 3)"></div>
+                        <div class="cell" onclick="makeMove(this, 4)"></div>
+                        <div class="cell" onclick="makeMove(this, 5)"></div>
+                        <div class="cell" onclick="makeMove(this, 6)"></div>
+                        <div class="cell" onclick="makeMove(this, 7)"></div>
+                        <div class="cell" onclick="makeMove(this, 8)"></div>
+                    </div>
+                    <button class="launch-btn" onclick="resetGame()" style="margin-top: 15px;">Restart Game</button>
+                </div>
+
+                <!-- 3. Pong View -->
+                <div id="sub-pong" class="game-view">
+                    <div class="game-status-bar" id="pongStatus">Player: 0 | AI: 0</div>
+                    <canvas id="pongCanvas" width="400" height="300" style="background:#1a1a20; border-radius:8px; margin-bottom:12px;"></canvas>
+                    <button class="launch-btn" onclick="startPong()">Start / Restart Pong</button>
+                </div>
+
+                <!-- 4. Memory Match View -->
+                <div id="sub-memory" class="game-view">
+                    <div class="game-status-bar" id="memoryStatus">Flips: 0 | Pairs Found: 0 / 8</div>
+                    <div id="memoryGrid" class="memory-grid"></div>
+                    <button class="launch-btn" onclick="initMemoryGame()">Restart Memory Game</button>
+                </div>
+
+                <!-- 5. Breakout / Brick Breaker View -->
+                <div id="sub-breakout" class="game-view">
+                    <div class="game-status-bar" id="breakoutStatus">Score: 0 | Lives: 3</div>
+                    <canvas id="breakoutCanvas" width="400" height="300" style="background:#1a1a20; border-radius:8px; margin-bottom:12px;"></canvas>
+                    <button class="launch-btn" onclick="startBreakout()">Start / Restart Breakout</button>
+                </div>
+            </div>
+
+            <!-- Dawson AI App -->
+            <div id="ai-app" class="app-screen">
+                <h2>🤖 Dawson AI</h2>
+                <div class="chat-box" id="chatBox">
+                    <div class="chat-msg ai-msg">Hello! I am Dawson AI. Ready to chat or help you with Dawson OS!</div>
+                </div>
+                <input type="text" id="chatInput" class="chat-input" placeholder="Type anything and press Enter..." onkeydown="sendAiMessage(event)">
+            </div>
+
+            <!-- Calculator -->
+            <div id="calculator-app" class="app-screen">
+                <input type="text" id="calcDisplay" readonly placeholder="0" style="width:200px; height:40px; text-align:right; padding:5px; margin-bottom:10px; background:#1a1a20; color:white; border:1px solid #2d2d35; border-radius:6px; font-size:1.2rem;">
+                <div style="display:grid; grid-template-columns: repeat(4, 45px); gap:5px;">
+                    <button class="game-nav-btn" onclick="clearCalc()">C</button>
+                    <button class="game-nav-btn" onclick="appendCalc('/')">/</button>
+                    <button class="game-nav-btn" onclick="appendCalc('*')">*</button>
+                    <button class="game-nav-btn" onclick="appendCalc('-')">-</button>
+                    <button class="game-nav-btn" onclick="appendCalc('7')">7</button>
+                    <button class="game-nav-btn" onclick="appendCalc('8')">8</button>
+                    <button class="game-nav-btn" onclick="appendCalc('9')">9</button>
+                    <button class="game-nav-btn" onclick="appendCalc('+')">+</button>
+                    <button class="game-nav-btn" onclick="appendCalc('4')">4</button>
+                    <button class="game-nav-btn" onclick="appendCalc('5')">5</button>
+                    <button class="game-nav-btn" onclick="appendCalc('6')">6</button>
+                    <button class="game-nav-btn" onclick="solveCalc()">=</button>
+                    <button class="game-nav-btn" onclick="appendCalc('1')">1</button>
+                    <button class="game-nav-btn" onclick="appendCalc('2')">2</button>
+                    <button class="game-nav-btn" onclick="appendCalc('3')">3</button>
+                    <button class="game-nav-btn" onclick="appendCalc('0')">0</button>
+                </div>
+            </div>
+
+            <!-- Canvas Paint -->
+            <div id="paint-app" class="app-screen">
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <input type="color" id="paintColor" value="#f96332" style="border:none; width:35px; height:35px; cursor:pointer; background:none;">
+                    <button class="launch-btn" onclick="clearCanvas()">Clear Canvas</button>
+                </div>
+                <canvas id="paintCanvas" width="500" height="300" style="background:white; border-radius:8px; cursor:crosshair;"></canvas>
+            </div>
+
+            <!-- Stopwatch -->
+            <div id="stopwatch-app" class="app-screen">
+                <div id="stopwatchDisplay" style="font-size: 3rem; font-family: monospace; color:#f96332;">00:00.00</div>
+                <div style="display:flex; gap:10px;">
+                    <button class="launch-btn" onclick="startStopwatch()">Start</button>
+                    <button class="launch-btn" onclick="stopStopwatch()">Stop</button>
+                    <button class="launch-btn" onclick="resetStopwatch()">Reset</button>
+                </div>
+            </div>
+
+            <!-- Quick Notes -->
+            <div id="notes-app" class="app-screen">
+                <h2>Quick Notepad</h2>
+                <textarea id="notesArea" placeholder="Type your notes here... (Auto saved)" oninput="saveNotes()"></textarea>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Clock
+        setInterval(() => { 
+            document.getElementById('clock').innerText = new Date().toLocaleTimeString(); 
+        }, 1000);
+
+        // App Navigation
+        function openApp(appName, btnElement) {
+            document.querySelectorAll('.app-screen').forEach(app => app.classList.remove('active'));
+            document.querySelectorAll('.sidebar .app-btn').forEach(btn => btn.classList.remove('active-nav'));
+            
+            document.getElementById(appName + '-app').classList.add('active');
+            if(btnElement) btnElement.classList.add('active-nav');
+        }
+
+        // Consolidated Game Switching
+        function switchGame(gameId, btnElement) {
+            document.querySelectorAll('.game-view').forEach(view => view.classList.remove('game-active'));
+            document.querySelectorAll('.game-bar .game-nav-btn').forEach(btn => btn.classList.remove('active-game-tab'));
+            
+            document.getElementById(gameId).classList.add('game-active');
+            if(btnElement) btnElement.classList.add('active-game-tab');
+
+            if(gameId === 'sub-memory') initMemoryGame();
+        }
+
+        // Search Bar Logic
+        function handleSearch(e) {
+            if (e.key === 'Enter') {
+                const query = document.getElementById('searchInput').value.trim();
+                if (query) window.open('https://duckduckgo.com/?q=' + encodeURIComponent(query), '_blank');
+            }
+        }
+
+        // Dawson AI Logic
+        function sendAiMessage(e) {
+            if (e.key === 'Enter') {
+                const input = document.getElementById('chatInput');
+                const msg = input.value.trim();
+                if(!msg) return;
+
+                const chatBox = document.getElementById('chatBox');
+                chatBox.innerHTML += `<div class="chat-msg user-msg">${msg}</div>`;
+                input.value = '';
+
+                setTimeout(() => {
+                    const lower = msg.toLowerCase();
+                    let reply = "";
+
+                    if (lower.includes("love you")) {
+                        reply = "I appreciate that! Dawson OS is happy to have you here. ❤️";
+                    } else if (lower.includes("own you")) {
+                        reply = "Indeed! You are the administrator of Dawson OS.";
+                    } else if (lower.includes("hello") || lower.includes("hi") || lower.includes("hey")) {
+                        reply = "Greetings! What games or tools are we trying out today?";
+                    } else if (lower.includes("who made you") || lower.includes("creator")) {
+                        reply = "I am the built-in AI assistant for Dawson OS!";
+                    } else if (lower.includes("game") || lower.includes("play")) {
+                        reply = "We have Snake, Tic-Tac-Toe, Pong, Memory Match, and Breakout in the Game Center!";
+                    } else {
+                        const defaultResponses = [
+                            `I hear you! Regarding "${msg}", how can I assist further?`,
+                            "All systems running smoothly in Dawson OS.",
+                            "Command acknowledged. Let me know if you need tools, games, or notes!",
+                            "I'm here to help with whatever you need on Dawson OS."
+                        ];
+                        reply = defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+                    }
+
+                    chatBox.innerHTML += `<div class="chat-msg ai-msg">${reply}</div>`;
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                }, 300);
+            }
+        }
+
+        // 1. Snake Game Engine
+        let snakeLoop = null;
+        let snakeHighScore = 0;
+        function startSnake() {
+            if(snakeLoop) clearInterval(snakeLoop);
+            const canvas = document.getElementById('snakeCanvas');
+            const ctx = canvas.getContext('2d');
+            let snake = [{x: 180, y: 180}];
+            let food = {x: 80, y: 80};
+            let dx = 20, dy = 0;
+            let score = 0;
+
+            document.onkeydown = (e) => {
+                if (e.key === 'ArrowUp' && dy === 0) { dx = 0; dy = -20; }
+                if (e.key === 'ArrowDown' && dy === 0) { dx = 0; dy = 20; }
+                if (e.key === 'ArrowLeft' && dx === 0) { dx = -20; dy = 0; }
+                if (e.key === 'ArrowRight' && dx === 0) { dx = 20; dy = 0; }
+            };
+
+            snakeLoop = setInterval(() => {
+                let head = {x: snake[0].x + dx, y: snake[0].y + dy};
+                
+                // Wall Collision / Self Collision
+                if(head.x < 0 || head.x >= 360 || head.y < 0 || head.y >= 360 || 
+                   snake.some(segment => segment.x === head.x && segment.y === head.y)) {
+                    clearInterval(snakeLoop);
+                    document.getElementById('snakeStatus').innerText = `Game Over! Final Score: ${score}`;
+                    return;
+                }
+
+                snake.unshift(head);
+                if(head.x === food.x && head.y === food.y) {
+                    score += 10;
+                    if(score > snakeHighScore) snakeHighScore = score;
+                    food = {
+                        x: Math.floor(Math.random()*18)*20, 
+                        y: Math.floor(Math.random()*18)*20
+                    };
+                } else { 
+                    snake.pop(); 
+                }
+
+                document.getElementById('snakeStatus').innerText = `Score: ${score} | High Score: ${snakeHighScore}`;
+
+                ctx.fillStyle = '#1a1a20'; ctx.fillRect(0, 0, 360, 360);
+                ctx.fillStyle = '#f96332'; ctx.fillRect(food.x, food.y, 18, 18);
+                ctx.fillStyle = '#ffffff'; snake.forEach(part => ctx.fillRect(part.x, part.y, 18, 18));
+            }, 110);
+        }
+
+        // 2. Tic-Tac-Toe Engine
+        let currentPlayer = 'X', boardState = ['', '', '', '', '', '', '', '', ''], gameActive = true;
+        const winningCombos = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+
+        function makeMove(cell, index) {
+            if (boardState[index] !== '' || !gameActive) return;
+            
+            executeMove(cell, index, currentPlayer);
+
+            if (gameActive && document.getElementById('tttMode').value === 'ai' && currentPlayer === 'O') {
+                setTimeout(makeAiMove, 250);
+            }
+        }
+
+        function executeMove(cell, index, player) {
+            boardState[index] = player;
+            cell.innerText = player;
+
+            if (winningCombos.some(c => c.every(i => boardState[i] === player))) {
+                document.getElementById('status').innerText = `Player ${player} Wins! 🎉`;
+                gameActive = false;
+                return;
+            }
+
+            if (!boardState.includes('')) {
+                document.getElementById('status').innerText = "It's a Draw!";
+                gameActive = false;
+                return;
+            }
+
+            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            document.getElementById('status').innerText = `Player ${currentPlayer}'s Turn`;
+        }
+
+        function makeAiMove() {
+            if(!gameActive) return;
+            let availableIndices = boardState.map((val, idx) => val === '' ? idx : null).filter(val => val !== null);
+            if(availableIndices.length > 0) {
+                let randomIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+                let targetCell = document.querySelectorAll('#sub-tictactoe .cell')[randomIndex];
+                executeMove(targetCell, randomIndex, 'O');
+            }
+        }
+
+        function resetGame() {
+            boardState = ['', '', '', '', '', '', '', '', ''];
+            gameActive = true;
+            currentPlayer = 'X';
+            document.getElementById('status').innerText = "Player X's Turn";
+            document.querySelectorAll('#sub-tictactoe .cell').forEach(cell => cell.innerText = '');
+        }
+
+        // 3. Pong Game Engine
+        let pongLoop = null;
+        function startPong() {
+            if(pongLoop) clearInterval(pongLoop);
+            const canvas = document.getElementById('pongCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            let p1Y = 110, p2Y = 110, pHeight = 80, pWidth = 10;
+            let ballX = 200, ballY = 150, ballVx = 3.5, ballVy = 2.5;
+            let playerScore = 0, aiScore = 0;
+
+            canvas.onmousemove = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                p1Y = e.clientY - rect.top - pHeight / 2;
+            };
+
+            pongLoop = setInterval(() => {
+                ballX += ballVx;
+                ballY += ballVy;
+
+                // Simple AI paddle tracking
+                if(p2Y + pHeight/2 < ballY - 10) p2Y += 2.5;
+                else if(p2Y + pHeight/2 > ballY + 10) p2Y -= 2.5;
+
+                // Wall bounds
+                if(ballY <= 0 || ballY >= canvas.height - 8) ballVy *= -1;
+
+                // Paddle 1 Collision
+                if(ballX <= 15 && ballY >= p1Y && ballY <= p1Y + pHeight) {
+                    ballVx = Math.abs(ballVx) * 1.05;
+                }
+
+                // Paddle 2 Collision
+                if(ballX >= canvas.width - 25 && ballY >= p2Y && ballY <= p2Y + pHeight) {
+                    ballVx = -Math.abs(ballVx) * 1.05;
+                }
+
+                // Score Check
+                if(ballX < 0) {
+                    aiScore++;
+                    ballX = 200; ballY = 150; ballVx = 3.5;
+                } else if(ballX > canvas.width) {
+                    playerScore++;
+                    ballX = 200; ballY = 150; ballVx = -3.5;
+                }
+
+                document.getElementById('pongStatus').innerText = `Player: ${playerScore} | AI: ${aiScore}`;
+
+                // Render Canvas
+                ctx.fillStyle = '#1a1a20'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(5, p1Y, pWidth, pHeight); // Player
+                ctx.fillRect(canvas.width - 15, p2Y, pWidth, pHeight); // AI
+                ctx.fillRect(ballX, ballY, 8, 8); // Ball
+            }, 1000 / 60);
+        }
+
+        // 4. Memory Match Engine
+        let memoryCards = [], flippedCards = [], matchedPairs = 0, totalFlips = 0;
+        const memoryEmojis = ['🍎', '🚀', '🎮', '🎨', '🔥', '⚡', '🤖', '👑'];
+
+        function initMemoryGame() {
+            const grid = document.getElementById('memoryGrid');
+            grid.innerHTML = '';
+            matchedPairs = 0;
+            totalFlips = 0;
+            flippedCards = [];
+            document.getElementById('memoryStatus').innerText = `Flips: 0 | Pairs Found: 0 / 8`;
+
+            let deck = [...memoryEmojis, ...memoryEmojis].sort(() => Math.random() - 0.5);
+
+            deck.forEach((emoji, idx) => {
+                const card = document.createElement('div');
+                card.className = 'memory-card';
+                card.dataset.emoji = emoji;
+                card.dataset.index = idx;
+                card.onclick = () => flipMemoryCard(card);
+                grid.appendChild(card);
+            });
+        }
+
+        function flipMemoryCard(card) {
+            if(card.classList.contains('flipped') || flippedCards.length >= 2) return;
+
+            card.classList.add('flipped');
+            card.innerText = card.dataset.emoji;
+            flippedCards.push(card);
+
+            if(flippedCards.length === 2) {
+                totalFlips++;
+                let [c1, c2] = flippedCards;
+                if(c1.dataset.emoji === c2.dataset.emoji) {
+                    matchedPairs++;
+                    flippedCards = [];
+                    document.getElementById('memoryStatus').innerText = `Flips: ${totalFlips} | Pairs Found: ${matchedPairs} / 8`;
+                    if(matchedPairs === 8) {
+                        document.getElementById('memoryStatus').innerText = `🎉 You Won in ${totalFlips} Flips!`;
+                    }
+                } else {
+                    setTimeout(() => {
+                        c1.classList.remove('flipped'); c1.innerText = '';
+                        c2.classList.remove('flipped'); c2.innerText = '';
+                        flippedCards = [];
+                        document.getElementById('memoryStatus').innerText = `Flips: ${totalFlips} | Pairs Found: ${matchedPairs} / 8`;
+                    }, 700);
+                }
+            }
+        }
+
+        // 5. Breakout / Brick Breaker Engine
+        let breakoutLoop = null;
+        function startBreakout() {
+            if(breakoutLoop) clearInterval(breakoutLoop);
+            const canvas = document.getElementById('breakoutCanvas');
+            const ctx = canvas.getContext('2d');
+
+            let paddleWidth = 75, paddleHeight = 10, paddleX = (canvas.width - paddleWidth) / 2;
+            let ballX = canvas.width / 2, ballY = canvas.height - 30;
+            let dx = 2.5, dy = -2.5;
+            let score = 0, lives = 3;
+
+            let rowCount = 3, colCount = 5, brickWidth = 65, brickHeight = 15, brickPadding = 10, offsetTop = 20, offsetLeft = 15;
+            let bricks = [];
+
+            for (let c = 0; c < colCount; c++) {
+                bricks[c] = [];
+                for (let r = 0; r < rowCount; r++) {
+                    bricks[c][r] = { x: 0, y: 0, status: 1 };
+                }
+            }
+
+            canvas.onmousemove = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const relativeX = e.clientX - rect.left;
+                if (relativeX > 0 && relativeX < canvas.width) {
+                    paddleX = relativeX - paddleWidth / 2;
+                }
+            };
+
+            breakoutLoop = setInterval(() => {
+                ctx.fillStyle = '#1a1a20';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Draw Bricks
+                for (let c = 0; c < colCount; c++) {
+                    for (let r = 0; r < rowCount; r++) {
+                        if (bricks[c][r].status === 1) {
+                            let brickX = c * (brickWidth + brickPadding) + offsetLeft;
+                            let brickY = r * (brickHeight + brickPadding) + offsetTop;
+                            bricks[c][r].x = brickX;
+                            bricks[c][r].y = brickY;
+                            ctx.fillStyle = '#f96332';
+                            ctx.fillRect(brickX, brickY, brickWidth, brickHeight);
+
+                            // Collision check with bricks
+                            if (ballX > brickX && ballX < brickX + brickWidth && ballY > brickY && ballY < brickY + brickHeight) {
+                                dy = -dy;
+                                bricks[c][r].status = 0;
+                                score += 10;
+                                if (score === rowCount * colCount * 10) {
+                                    clearInterval(breakoutLoop);
+                                    document.getElementById('breakoutStatus').innerText = "🎉 Winner! All Bricks Destroyed!";
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Bounce sides
+                if (ballX + dx > canvas.width - 8 || ballX + dx < 8) dx = -dx;
+                if (ballY + dy < 8) dy = -dy;
+                else if (ballY + dy > canvas.height - 15) {
+                    if (ballX > paddleX && ballX < paddleX + paddleWidth) {
+                        dy = -dy;
+                    } else {
+                        lives--;
+                        if (!lives) {
+                            clearInterval(breakoutLoop);
+                            document.getElementById('breakoutStatus').innerText = "Game Over!";
+                            return;
+                        } else {
+                            ballX = canvas.width / 2; ballY = canvas.height - 30;
+                            dx = 2.5; dy = -2.5; paddleX = (canvas.width - paddleWidth) / 2;
+                        }
+                    }
+                }
+
+                ballX += dx;
+                ballY += dy;
+
+                document.getElementById('breakoutStatus').innerText = `Score: ${score} | Lives: ${lives}`;
+
+                // Draw Paddle & Ball
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(paddleX, canvas.height - paddleHeight - 5, paddleWidth, paddleHeight);
+                ctx.fillRect(ballX, ballY, 8, 8);
+            }, 1000 / 60);
+        }
+
+        // Calc Tools
+        function appendCalc(v) { document.getElementById('calcDisplay').value += v; }
+        function clearCalc() { document.getElementById('calcDisplay').value = ''; }
+        function solveCalc() { 
+            try { 
+                document.getElementById('calcDisplay').value = eval(document.getElementById('calcDisplay').value); 
+            } catch { 
+                document.getElementById('calcDisplay').value = 'Error'; 
+            } 
+        }
+
+        // Canvas Paint Tool
+        const pCanvas = document.getElementById('paintCanvas');
+        const pCtx = pCanvas.getContext('2d');
+        let painting = false;
+
+        pCanvas.addEventListener('mousedown', () => painting = true);
+        pCanvas.addEventListener('mouseup', () => { painting = false; pCtx.beginPath(); });
+        pCanvas.addEventListener('mousemove', (e) => {
+            if(!painting) return;
+            const rect = pCanvas.getBoundingClientRect();
+            pCtx.lineWidth = 4; pCtx.lineCap = 'round';
+            pCtx.strokeStyle = document.getElementById('paintColor').value;
+            pCtx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+            pCtx.stroke(); 
+            pCtx.beginPath(); 
+            pCtx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+        });
+        function clearCanvas() { pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height); }
+
+        // Stopwatch Tool
+        let timer, ms = 0, running = false;
+        function startStopwatch() {
+            if(!running) {
+                running = true;
+                timer = setInterval(() => {
+                    ms += 10;
+                    let sec = Math.floor(ms / 1000);
+                    let msec = Math.floor((ms % 1000) / 10);
+                    document.getElementById('stopwatchDisplay').innerText = `${sec < 10 ? '0' : ''}${sec}:${msec < 10 ? '0' : ''}${msec}`;
+                }, 10);
+            }
+        }
+        function stopStopwatch() { running = false; clearInterval(timer); }
+        function resetStopwatch() { stopStopwatch(); ms = 0; document.getElementById('stopwatchDisplay').innerText = "00:00.00"; }
+
+        // Quick Notes Tool
+        document.getElementById('notesArea').value = localStorage.getItem('dawson_os_notes') || '';
+        function saveNotes() { localStorage.setItem('dawson_os_notes', document.getElementById('notesArea').value); }
+    </script>
+</body>
+</html>

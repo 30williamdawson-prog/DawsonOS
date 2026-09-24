@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -817,52 +818,56 @@
         function initMemoryGame() {
             const grid = document.getElementById('memoryGrid');
             grid.innerHTML = '';
+            flippedCards = [];
             matchedPairs = 0;
             totalFlips = 0;
-            flippedCards = [];
             document.getElementById('memoryStatus').innerText = `Flips: 0 | Pairs Found: 0 / 8`;
 
-            let deck = [...memoryEmojis, ...memoryEmojis].sort(() => Math.random() - 0.5);
+            const deck = [...memoryEmojis, ...memoryEmojis].sort(() => Math.random() - 0.5);
 
-            deck.forEach((emoji, idx) => {
+            deck.forEach((emoji, index) => {
                 const card = document.createElement('div');
-                card.className = 'memory-card';
+                card.classList.add('memory-card');
                 card.dataset.emoji = emoji;
-                card.dataset.index = idx;
+                card.dataset.index = index;
+                card.innerText = '❓';
                 card.onclick = () => flipMemoryCard(card);
                 grid.appendChild(card);
             });
         }
 
         function flipMemoryCard(card) {
-            if(card.classList.contains('flipped') || flippedCards.length >= 2) return;
+            if (flippedCards.length === 2 || card.classList.contains('flipped')) return;
 
             card.classList.add('flipped');
             card.innerText = card.dataset.emoji;
             flippedCards.push(card);
 
-            if(flippedCards.length === 2) {
+            if (flippedCards.length === 2) {
                 totalFlips++;
-                let [c1, c2] = flippedCards;
-                if(c1.dataset.emoji === c2.dataset.emoji) {
+                const [card1, card2] = flippedCards;
+
+                if (card1.dataset.emoji === card2.dataset.emoji) {
                     matchedPairs++;
                     flippedCards = [];
                     document.getElementById('memoryStatus').innerText = `Flips: ${totalFlips} | Pairs Found: ${matchedPairs} / 8`;
-                    if(matchedPairs === 8) {
+                    if (matchedPairs === 8) {
                         document.getElementById('memoryStatus').innerText = `🎉 You Won in ${totalFlips} Flips!`;
                     }
                 } else {
                     setTimeout(() => {
-                        c1.classList.remove('flipped'); c1.innerText = '';
-                        c2.classList.remove('flipped'); c2.innerText = '';
+                        card1.classList.remove('flipped');
+                        card2.classList.remove('flipped');
+                        card1.innerText = '❓';
+                        card2.innerText = '❓';
                         flippedCards = [];
                         document.getElementById('memoryStatus').innerText = `Flips: ${totalFlips} | Pairs Found: ${matchedPairs} / 8`;
-                    }, 700);
+                    }, 800);
                 }
             }
         }
 
-        // 5. Breakout / Brick Breaker Engine
+        // 5. Breakout Game Engine
         let breakoutLoop = null;
         function startBreakout() {
             if(breakoutLoop) clearInterval(breakoutLoop);
@@ -871,12 +876,11 @@
 
             let paddleWidth = 75, paddleHeight = 10, paddleX = (canvas.width - paddleWidth) / 2;
             let ballX = canvas.width / 2, ballY = canvas.height - 30;
-            let dx = 2.5, dy = -2.5;
+            let dx = 2, dy = -2;
             let score = 0, lives = 3;
 
-            let rowCount = 3, colCount = 5, brickWidth = 65, brickHeight = 15, brickPadding = 10, offsetTop = 20, offsetLeft = 15;
+            const rowCount = 3, colCount = 5, brickWidth = 65, brickHeight = 15, brickPadding = 10, offsetTop = 30, offsetLeft = 15;
             let bricks = [];
-
             for (let c = 0; c < colCount; c++) {
                 bricks[c] = [];
                 for (let r = 0; r < rowCount; r++) {
@@ -893,42 +897,45 @@
             };
 
             breakoutLoop = setInterval(() => {
-                ctx.fillStyle = '#1a1a20';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#1a1a20'; ctx.fillRect(0, 0, canvas.width, canvas.height);
 
                 // Draw Bricks
                 for (let c = 0; c < colCount; c++) {
                     for (let r = 0; r < rowCount; r++) {
                         if (bricks[c][r].status === 1) {
-                            let brickX = c * (brickWidth + brickPadding) + offsetLeft;
-                            let brickY = r * (brickHeight + brickPadding) + offsetTop;
+                            let brickX = (c * (brickWidth + brickPadding)) + offsetLeft;
+                            let brickY = (r * (brickHeight + brickPadding)) + offsetTop;
                             bricks[c][r].x = brickX;
                             bricks[c][r].y = brickY;
                             ctx.fillStyle = '#f96332';
                             ctx.fillRect(brickX, brickY, brickWidth, brickHeight);
 
-                            // Collision check with bricks
+                            // Brick Collision
                             if (ballX > brickX && ballX < brickX + brickWidth && ballY > brickY && ballY < brickY + brickHeight) {
                                 dy = -dy;
                                 bricks[c][r].status = 0;
                                 score += 10;
                                 if (score === rowCount * colCount * 10) {
                                     clearInterval(breakoutLoop);
-                                    document.getElementById('breakoutStatus').innerText = "🎉 Winner! All Bricks Destroyed!";
-                                    return;
+                                    document.getElementById('breakoutStatus').innerText = "🎉 You Win!";
                                 }
                             }
                         }
                     }
                 }
 
-                // Bounce sides
-                if (ballX + dx > canvas.width - 8 || ballX + dx < 8) dx = -dx;
-                if (ballY + dy < 8) dy = -dy;
+                // Draw Paddle & Ball
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(paddleX, canvas.height - paddleHeight - 5, paddleWidth, paddleHeight);
+                ctx.beginPath(); ctx.arc(ballX, ballY, 6, 0, Math.PI * 2); ctx.fill();
+
+                // Ball Movement & Collision
+                if (ballX + dx > canvas.width - 6 || ballX + dx < 6) dx = -dx;
+                if (ballY + dy < 6) dy = -dy;
                 else if (ballY + dy > canvas.height - 15) {
                     if (ballX > paddleX && ballX < paddleX + paddleWidth) {
                         dy = -dy;
-                    } else {
+                    } else if (ballY + dy > canvas.height - 6) {
                         lives--;
                         if (!lives) {
                             clearInterval(breakoutLoop);
@@ -936,72 +943,75 @@
                             return;
                         } else {
                             ballX = canvas.width / 2; ballY = canvas.height - 30;
-                            dx = 2.5; dy = -2.5; paddleX = (canvas.width - paddleWidth) / 2;
+                            dx = 2; dy = -2;
+                            paddleX = (canvas.width - paddleWidth) / 2;
                         }
                     }
                 }
 
-                ballX += dx;
-                ballY += dy;
-
+                ballX += dx; ballY += dy;
                 document.getElementById('breakoutStatus').innerText = `Score: ${score} | Lives: ${lives}`;
-
-                // Draw Paddle & Ball
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(paddleX, canvas.height - paddleHeight - 5, paddleWidth, paddleHeight);
-                ctx.fillRect(ballX, ballY, 8, 8);
             }, 1000 / 60);
         }
 
-        // Calc Tools
-        function appendCalc(v) { document.getElementById('calcDisplay').value += v; }
+        // --- Tools Logic ---
+        // Calculator
+        function appendCalc(val) { document.getElementById('calcDisplay').value += val; }
         function clearCalc() { document.getElementById('calcDisplay').value = ''; }
-        function solveCalc() { 
-            try { 
-                document.getElementById('calcDisplay').value = eval(document.getElementById('calcDisplay').value); 
-            } catch { 
-                document.getElementById('calcDisplay').value = 'Error'; 
-            } 
-        }
-
-        // Canvas Paint Tool
-        const pCanvas = document.getElementById('paintCanvas');
-        const pCtx = pCanvas.getContext('2d');
-        let painting = false;
-
-        pCanvas.addEventListener('mousedown', () => painting = true);
-        pCanvas.addEventListener('mouseup', () => { painting = false; pCtx.beginPath(); });
-        pCanvas.addEventListener('mousemove', (e) => {
-            if(!painting) return;
-            const rect = pCanvas.getBoundingClientRect();
-            pCtx.lineWidth = 4; pCtx.lineCap = 'round';
-            pCtx.strokeStyle = document.getElementById('paintColor').value;
-            pCtx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
-            pCtx.stroke(); 
-            pCtx.beginPath(); 
-            pCtx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
-        });
-        function clearCanvas() { pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height); }
-
-        // Stopwatch Tool
-        let timer, ms = 0, running = false;
-        function startStopwatch() {
-            if(!running) {
-                running = true;
-                timer = setInterval(() => {
-                    ms += 10;
-                    let sec = Math.floor(ms / 1000);
-                    let msec = Math.floor((ms % 1000) / 10);
-                    document.getElementById('stopwatchDisplay').innerText = `${sec < 10 ? '0' : ''}${sec}:${msec < 10 ? '0' : ''}${msec}`;
-                }, 10);
+        function solveCalc() {
+            try {
+                document.getElementById('calcDisplay').value = eval(document.getElementById('calcDisplay').value);
+            } catch {
+                document.getElementById('calcDisplay').value = 'Error';
             }
         }
-        function stopStopwatch() { running = false; clearInterval(timer); }
-        function resetStopwatch() { stopStopwatch(); ms = 0; document.getElementById('stopwatchDisplay').innerText = "00:00.00"; }
 
-        // Quick Notes Tool
-        document.getElementById('notesArea').value = localStorage.getItem('dawson_os_notes') || '';
-        function saveNotes() { localStorage.setItem('dawson_os_notes', document.getElementById('notesArea').value); }
+        // Canvas Paint
+        const paintCanvas = document.getElementById('paintCanvas');
+        const paintCtx = paintCanvas.getContext('2d');
+        let painting = false;
+
+        paintCanvas.onmousedown = () => painting = true;
+        paintCanvas.onmouseup = () => { painting = false; paintCtx.beginPath(); };
+        paintCanvas.onmousemove = (e) => {
+            if (!painting) return;
+            const rect = paintCanvas.getBoundingClientRect();
+            paintCtx.lineWidth = 3;
+            paintCtx.lineCap = 'round';
+            paintCtx.strokeStyle = document.getElementById('paintColor').value;
+            paintCtx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+            paintCtx.stroke();
+            paintCtx.beginPath();
+            paintCtx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+        };
+        function clearCanvas() { paintCtx.clearRect(0, 0, paintCanvas.width, paintCanvas.height); }
+
+        // Stopwatch
+        let stopwatchTimer = null, elapsedTime = 0;
+        function startStopwatch() {
+            if (stopwatchTimer) return;
+            let startTime = Date.now() - elapsedTime;
+            stopwatchTimer = setInterval(() => {
+                elapsedTime = Date.now() - startTime;
+                let ms = Math.floor((elapsedTime % 1000) / 10);
+                let sec = Math.floor((elapsedTime / 1000) % 60);
+                let min = Math.floor((elapsedTime / (1000 * 60)) % 60);
+                document.getElementById('stopwatchDisplay').innerText = 
+                    `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}`;
+            }, 10);
+        }
+        function stopStopwatch() { clearInterval(stopwatchTimer); stopwatchTimer = null; }
+        function resetStopwatch() {
+            stopStopwatch();
+            elapsedTime = 0;
+            document.getElementById('stopwatchDisplay').innerText = "00:00.00";
+        }
+
+        // Quick Notes Auto-Save
+        document.getElementById('notesArea').value = localStorage.getItem('dawson_notes') || '';
+        function saveNotes() {
+            localStorage.setItem('dawson_notes', document.getElementById('notesArea').value);
+        }
     </script>
 </body>
 </html>

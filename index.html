@@ -1,5 +1,5 @@
 // ==========================================
-// DAWSON OS - CORE SYSTEM SCRIPT
+// DAWSON OS - CORE SYSTEM SCRIPT WITH CHATBOT
 // ==========================================
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initNotepad();
   initCalculator();
   initPaintApp();
+  initChatbot();
 });
 
 /* --- 1. SYSTEM CLOCK --- */
@@ -31,19 +32,16 @@ function initWindowManager() {
   const windows = document.querySelectorAll('.os-window');
 
   windows.forEach(win => {
-    // Bring window to front on click
     win.addEventListener('mousedown', () => {
       activeZIndex++;
       win.style.zIndex = activeZIndex;
     });
 
-    // Make window draggable via header
     const header = win.querySelector('.window-header');
     if (header) {
       makeElementDraggable(win, header);
     }
 
-    // Close button event
     const closeBtn = win.querySelector('.btn-close');
     if (closeBtn) {
       closeBtn.addEventListener('click', () => {
@@ -93,24 +91,117 @@ function makeElementDraggable(elmnt, handle) {
   }
 }
 
-/* --- 3. NOTEPAD APP (LOCAL STORAGE) --- */
+/* --- 3. DAWSON AI CHATBOT ENGINE --- */
+function initChatbot() {
+  const sendBtn = document.getElementById('chat-send-btn');
+  const inputField = document.getElementById('chat-input');
+
+  if (!sendBtn || !inputField) return;
+
+  sendBtn.addEventListener('click', handleUserMessage);
+  inputField.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') handleUserMessage();
+  });
+}
+
+function handleUserMessage() {
+  const inputField = document.getElementById('chat-input');
+  const message = inputField.value.trim();
+
+  if (message === '') return;
+
+  // Display user's message
+  appendChatMessage('User', message);
+  inputField.value = '';
+
+  // Simulate AI "thinking" time
+  setTimeout(() => {
+    const aiResponse = generateAIResponse(message);
+    appendChatMessage('Dawson AI', aiResponse);
+  }, 600);
+}
+
+function appendChatMessage(sender, text) {
+  const chatLog = document.getElementById('chat-log');
+  if (!chatLog) return;
+
+  const msgDiv = document.createElement('div');
+  msgDiv.className = sender === 'User' ? 'chat-msg user-msg' : 'chat-msg ai-msg';
+  msgDiv.style.margin = '8px 0';
+  msgDiv.style.padding = '8px 12px';
+  msgDiv.style.borderRadius = '8px';
+  msgDiv.style.maxWidth = '80%';
+
+  if (sender === 'User') {
+    msgDiv.style.backgroundColor = '#2563eb';
+    msgDiv.style.color = '#ffffff';
+    msgDiv.style.marginLeft = 'auto';
+  } else {
+    msgDiv.style.backgroundColor = '#374151';
+    msgDiv.style.color = '#ffffff';
+  }
+
+  msgDiv.innerText = `${sender}: ${text}`;
+  chatLog.appendChild(msgDiv);
+  chatLog.scrollTop = chatLog.scrollHeight;
+}
+
+function generateAIResponse(input) {
+  const lower = input.toLowerCase();
+
+  // Pattern matching logic
+  if (lower.includes('hello') || lower.includes('hi') || lower.includes('hey')) {
+    return "Hello! Welcome to Dawson OS. How can I help you today?";
+  } 
+  if (lower.includes('who are you') || lower.includes('name')) {
+    return "I am Dawson AI, the built-in virtual assistant for Dawson OS.";
+  }
+  if (lower.includes('time') || lower.includes('clock')) {
+    return `The current system time is ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}.`;
+  }
+  if (lower.includes('calc') || lower.includes('math')) {
+    return "You can open the Calculator app from the taskbar to run mathematical operations.";
+  }
+  if (lower.includes('draw') || lower.includes('paint')) {
+    return "Launch the Dawson Paint app to sketch, change colors, and adjust brush sizes!";
+  }
+  if (lower.includes('note') || lower.includes('save')) {
+    return "The Notepad app saves your notes directly to your local browser storage automatically.";
+  }
+  if (lower.includes('aphg') || lower.includes('geography')) {
+    return "Remember: Distance decay shows interaction decreasing as distance increases!";
+  }
+  if (lower.includes('clear')) {
+    const chatLog = document.getElementById('chat-log');
+    if (chatLog) chatLog.innerHTML = '';
+    return "Chat log cleared!";
+  }
+
+  // Fallback dynamic responses
+  const fallbacks = [
+    "I'm processing that. Try asking about Dawson OS features like Paint, Notepad, or the Calculator!",
+    "Interesting! How else can I assist your desktop experience?",
+    "I'm continuously learning. Try typing 'time' or asking about 'notes'!",
+    "System running smooth. What app would you like to build next?"
+  ];
+
+  return fallbacks[Math.floor(Math.random() * fallbacks.length)];
+}
+
+/* --- 4. NOTEPAD APP --- */
 function initNotepad() {
   const notepadArea = document.getElementById('notepad-textarea');
   if (!notepadArea) return;
 
-  // Load saved note on startup
   const savedNote = localStorage.getItem('dawson_os_note');
-  if (savedNote) {
-    notepadArea.value = savedNote;
-  }
+  if (savedNote) notepadArea.value = savedNote;
 
-  // Auto-save changes
   notepadArea.addEventListener('input', () => {
     localStorage.setItem('dawson_os_note', notepadArea.value);
   });
 }
 
-/* --- 4. CALCULATOR APP --- */
+/* --- 5. CALCULATOR APP --- */
 let calcDisplayValue = "0";
 
 function initCalculator() {
@@ -118,11 +209,7 @@ function initCalculator() {
 }
 
 function calcInput(num) {
-  if (calcDisplayValue === "0") {
-    calcDisplayValue = num.toString();
-  } else {
-    calcDisplayValue += num.toString();
-  }
+  calcDisplayValue = (calcDisplayValue === "0") ? num.toString() : calcDisplayValue + num.toString();
   updateCalcDisplay();
 }
 
@@ -138,7 +225,6 @@ function calcClear() {
 
 function calcEquals() {
   try {
-    // Basic evaluation for display string
     const result = eval(calcDisplayValue.replace(/×/g, '*').replace(/÷/g, '/'));
     calcDisplayValue = String(result);
   } catch (err) {
@@ -149,12 +235,10 @@ function calcEquals() {
 
 function updateCalcDisplay() {
   const display = document.getElementById('calc-display');
-  if (display) {
-    display.innerText = calcDisplayValue;
-  }
+  if (display) display.innerText = calcDisplayValue;
 }
 
-/* --- 5. DAWSON PAINT APP --- */
+/* --- 6. DAWSON PAINT APP --- */
 function initPaintApp() {
   const canvas = document.getElementById('paint-canvas');
   if (!canvas) return;
@@ -164,34 +248,22 @@ function initPaintApp() {
   let currentColor = '#000000';
   let brushSize = 5;
 
-  // Set default background color
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Event handlers
-  canvas.addEventListener('mousedown', startDrawing);
+  canvas.addEventListener('mousedown', (e) => { isDrawing = true; draw(e); });
   canvas.addEventListener('mousemove', draw);
-  canvas.addEventListener('mouseup', stopDrawing);
-  canvas.addEventListener('mouseout', stopDrawing);
+  canvas.addEventListener('mouseup', () => { isDrawing = false; ctx.beginPath(); });
+  canvas.addEventListener('mouseout', () => { isDrawing = false; ctx.beginPath(); });
 
   const colorPicker = document.getElementById('paint-color');
-  if (colorPicker) {
-    colorPicker.addEventListener('change', (e) => currentColor = e.target.value);
-  }
+  if (colorPicker) colorPicker.addEventListener('change', (e) => currentColor = e.target.value);
 
   const sizePicker = document.getElementById('paint-size');
-  if (sizePicker) {
-    sizePicker.addEventListener('change', (e) => brushSize = e.target.value);
-  }
-
-  function startDrawing(e) {
-    isDrawing = true;
-    draw(e);
-  }
+  if (sizePicker) sizePicker.addEventListener('change', (e) => brushSize = e.target.value);
 
   function draw(e) {
     if (!isDrawing) return;
-
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -204,11 +276,6 @@ function initPaintApp() {
     ctx.stroke();
     ctx.beginPath();
     ctx.moveTo(x, y);
-  }
-
-  function stopDrawing() {
-    isDrawing = false;
-    ctx.beginPath();
   }
 }
 

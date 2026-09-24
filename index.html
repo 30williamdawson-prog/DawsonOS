@@ -1,631 +1,221 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dawson OS</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
-
-        body {
-            background: radial-gradient(circle at center, #1b1b24 0%, #0d0d11 100%);
-            color: #ffffff;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        header {
-            background-color: rgba(22, 22, 26, 0.8);
-            backdrop-filter: blur(10px);
-            padding: 12px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #23232a;
-        }
-
-        header h1 {
-            font-size: 1.2rem;
-            color: #ffffff;
-            font-weight: 600;
-        }
-
-        #clock {
-            color: #888899;
-            font-size: 0.9rem;
-        }
-
-        .main-container {
-            display: flex;
-            flex: 1;
-            padding: 15px;
-            gap: 15px;
-            height: calc(100vh - 50px);
-        }
-
-        .sidebar {
-            width: 220px;
-            background-color: #16161a;
-            padding: 15px;
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            border: 1px solid #23232a;
-        }
-
-        .sidebar h2 {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1.2px;
-            color: #666677;
-            margin-top: 10px;
-            margin-bottom: 5px;
-        }
-
-        .app-btn {
-            background-color: #1f1f24;
-            color: #dddde8;
-            padding: 10px 12px;
-            border-radius: 8px;
-            border: 1px solid #2d2d35;
-            cursor: pointer;
-            text-align: left;
-            font-size: 0.9rem;
-            transition: all 0.2s ease;
-        }
-
-        .app-btn:hover {
-            background-color: #f96332;
-            color: #ffffff;
-            border-color: #f96332;
-        }
-
-        .viewport {
-            flex: 1;
-            background-color: #121215;
-            border-radius: 12px;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            border: 1px solid #23232a;
-        }
-
-        .app-screen {
-            display: none;
-            width: 100%;
-            height: 100%;
-        }
-
-        .active {
-            display: flex !important;
-        }
-
-        /* --- Dawson OS Home --- */
-        #browser-app {
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .browser-logo {
-            font-size: 3.2rem;
-            font-weight: 800;
-            color: #ffffff;
-            margin-bottom: 30px;
-        }
-
-        .browser-logo span { color: #f96332; }
-
-        .search-box {
-            width: 100%;
-            max-width: 650px;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 16px 20px;
-            border-radius: 30px;
-            border: 1px solid #2a2a35;
-            background-color: #1a1a20;
-            color: #ffffff;
-            font-size: 1rem;
-            outline: none;
-        }
-
-        .search-input:focus { border-color: #f96332; }
-
-        /* --- Links Folder / Hub --- */
-        #links-app {
-            flex-direction: column;
-            padding: 25px;
-            gap: 20px;
-            overflow-y: auto;
-        }
-
-        .links-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 15px;
-            margin-top: 10px;
-        }
-
-        .link-card {
-            background: #1a1a20;
-            border: 1px solid #2d2d35;
-            padding: 20px;
-            border-radius: 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            text-align: center;
-            cursor: pointer;
-            transition: transform 0.2s, border-color 0.2s;
-        }
-
-        .link-card:hover {
-            transform: translateY(-3px);
-            border-color: #f96332;
-        }
-
-        .link-icon { font-size: 2rem; }
-
-        /* --- Consolidated Game Hub --- */
-        #games-app {
-            flex-direction: column;
-            padding: 20px;
-            gap: 15px;
-        }
-
-        .game-bar {
-            display: flex;
-            gap: 10px;
-            background: #1a1a20;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #2d2d35;
-        }
-
-        .game-nav-btn {
-            padding: 8px 16px;
-            background: #24242e;
-            color: white;
-            border: 1px solid #2d2d35;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        .game-nav-btn:hover { background: #f96332; }
-
-        .game-view {
-            display: none;
-            flex: 1;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .game-active { display: flex !important; }
-
-        .board {
-            display: grid;
-            grid-template-columns: repeat(3, 90px);
-            grid-template-rows: repeat(3, 90px);
-            gap: 8px;
-        }
-
-        .cell {
-            width: 90px;
-            height: 90px;
-            background-color: #1a1a20;
-            border: 1px solid #2d2d35;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            font-weight: bold;
-            cursor: pointer;
-            border-radius: 8px;
-            color: #f96332;
-        }
-
-        .launch-btn {
-            padding: 10px 20px;
-            background-color: #f96332;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        /* --- Dawson AI Assistant --- */
-        #ai-app {
-            flex-direction: column;
-            padding: 20px;
-            height: 100%;
-        }
-
-        .chat-box {
-            flex: 1;
-            background: #1a1a20;
-            border-radius: 8px;
-            padding: 15px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #2d2d35;
-        }
-
-        .chat-msg {
-            padding: 10px 14px;
-            border-radius: 8px;
-            max-width: 80%;
-            font-size: 0.95rem;
-            line-height: 1.4;
-        }
-
-        .user-msg { background: #f96332; align-self: flex-end; }
-        .ai-msg { background: #2b2b36; align-self: flex-start; }
-
-        .chat-input {
-            width: 100%;
-            padding: 12px;
-            border-radius: 6px;
-            border: 1px solid #2d2d35;
-            background: #1a1a20;
-            color: white;
-            outline: none;
-        }
-
-        /* --- Utilities --- */
-        #calculator-app, #paint-app, #stopwatch-app {
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-        }
-
-        #notes-app {
-            flex-direction: column;
-            padding: 20px;
-            gap: 10px;
-        }
-
-        #notesArea {
-            width: 100%;
-            height: 100%;
-            background-color: #1a1a20;
-            border: 1px solid #2d2d35;
-            border-radius: 8px;
-            padding: 15px;
-            color: #ffffff;
-            outline: none;
-            resize: none;
-        }
-    </style>
-</head>
-<body>
-
-    <header>
-        <h1>Dawson OS</h1>
-        <div id="clock">00:00:00</div>
-    </header>
-
-    <div class="main-container">
-        <!-- Sidebar Navigation -->
-        <div class="sidebar">
-            <h2>System Apps</h2>
-            <button class="app-btn" onclick="openApp('browser')">🌐 Search Bar</button>
-            <button class="app-btn" onclick="openApp('ai')">🤖 Dawson AI</button>
-            <button class="app-btn" onclick="openApp('games')">🎮 Game Center</button>
-            <button class="app-btn" onclick="openApp('links')">📁 Web Links</button>
-            
-            <h2>Tools</h2>
-            <button class="app-btn" onclick="openApp('notes')">📝 Quick Notes</button>
-            <button class="app-btn" onclick="openApp('calculator')">🧮 Calculator</button>
-            <button class="app-btn" onclick="openApp('paint')">🎨 Canvas Paint</button>
-            <button class="app-btn" onclick="openApp('stopwatch')">⏱️ Stopwatch</button>
-        </div>
-
-        <!-- Main Display Viewport -->
-        <div class="viewport">
-            
-            <!-- Home Search -->
-            <div id="browser-app" class="app-screen active">
-                <div class="browser-logo">Dawson<span>•</span>OS</div>
-                <div class="search-box">
-                    <input type="text" id="searchInput" class="search-input" placeholder="Search or paste a URL" onkeydown="handleSearch(event)">
-                </div>
-            </div>
-
-            <!-- Links Folder / Hub -->
-            <div id="links-app" class="app-screen">
-                <h2>📁 External Links Folder</h2>
-                <p style="color:#888899;">Quick access launcher for external web tools and platforms:</p>
-                
-                <div class="links-grid">
-                    <div class="link-card" onclick="window.open('https://play.geforcenow.com', '_blank')">
-                        <span class="link-icon">🎮</span>
-                        <strong>GeForce NOW</strong>
-                    </div>
-                    <div class="link-card" onclick="window.open('https://youtube.com', '_blank')">
-                        <span class="link-icon">▶️</span>
-                        <strong>YouTube</strong>
-                    </div>
-                    <div class="link-card" onclick="window.open('https://discord.com/app', '_blank')">
-                        <span class="link-icon">💬</span>
-                        <strong>Discord</strong>
-                    </div>
-                    <div class="link-card" onclick="window.open('https://open.spotify.com', '_blank')">
-                        <span class="link-icon">🎵</span>
-                        <strong>Spotify</strong>
-                    </div>
-                    <div class="link-card" onclick="window.open('https://twitch.tv', '_blank')">
-                        <span class="link-icon">🟣</span>
-                        <strong>Twitch</strong>
-                    </div>
-                    <div class="link-card" onclick="window.open('https://github.com', '_blank')">
-                        <span class="link-icon">🐙</span>
-                        <strong>GitHub</strong>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Consolidated Game Hub -->
-            <div id="games-app" class="app-screen">
-                <div class="game-bar">
-                    <button class="game-nav-btn" onclick="switchGame('sub-snake')">🐍 Snake</button>
-                    <button class="game-nav-btn" onclick="switchGame('sub-tictactoe')">❌ Tic-Tac-Toe</button>
-                </div>
-
-                <!-- Snake Game View -->
-                <div id="sub-snake" class="game-view game-active">
-                    <canvas id="snakeCanvas" width="360" height="360" style="background:#1a1a20; border-radius:8px; margin-bottom:10px;"></canvas>
-                    <button class="launch-btn" onclick="startSnake()">Start Snake</button>
-                </div>
-
-                <!-- Tic-Tac-Toe View -->
-                <div id="sub-tictactoe" class="game-view">
-                    <h3 id="status" style="margin-bottom: 10px;">Player X's Turn</h3>
-                    <div class="board">
-                        <div class="cell" onclick="makeMove(this, 0)"></div>
-                        <div class="cell" onclick="makeMove(this, 1)"></div>
-                        <div class="cell" onclick="makeMove(this, 2)"></div>
-                        <div class="cell" onclick="makeMove(this, 3)"></div>
-                        <div class="cell" onclick="makeMove(this, 4)"></div>
-                        <div class="cell" onclick="makeMove(this, 5)"></div>
-                        <div class="cell" onclick="makeMove(this, 6)"></div>
-                        <div class="cell" onclick="makeMove(this, 7)"></div>
-                        <div class="cell" onclick="makeMove(this, 8)"></div>
-                    </div>
-                    <button class="launch-btn" onclick="resetGame()" style="margin-top: 15px;">Restart Game</button>
-                </div>
-            </div>
-
-            <!-- Dawson AI App -->
-            <div id="ai-app" class="app-screen">
-                <h2>🤖 Dawson AI</h2>
-                <div class="chat-box" id="chatBox">
-                    <div class="chat-msg ai-msg">Hello! I am Dawson AI. Ready to chat about anything.</div>
-                </div>
-                <input type="text" id="chatInput" class="chat-input" placeholder="Type anything and press Enter..." onkeydown="sendAiMessage(event)">
-            </div>
-
-            <!-- Calculator -->
-            <div id="calculator-app" class="app-screen">
-                <input type="text" id="calcDisplay" readonly placeholder="0" style="width:200px; height:40px; text-align:right; padding:5px; margin-bottom:10px;">
-                <div style="display:grid; grid-template-columns: repeat(4, 45px); gap:5px;">
-                    <button class="game-nav-btn" onclick="clearCalc()">C</button>
-                    <button class="game-nav-btn" onclick="appendCalc('/')">/</button>
-                    <button class="game-nav-btn" onclick="appendCalc('*')">*</button>
-                    <button class="game-nav-btn" onclick="appendCalc('-')">-</button>
-                    <button class="game-nav-btn" onclick="appendCalc('7')">7</button>
-                    <button class="game-nav-btn" onclick="appendCalc('8')">8</button>
-                    <button class="game-nav-btn" onclick="appendCalc('9')">9</button>
-                    <button class="game-nav-btn" onclick="appendCalc('+')">+</button>
-                    <button class="game-nav-btn" onclick="appendCalc('4')">4</button>
-                    <button class="game-nav-btn" onclick="appendCalc('5')">5</button>
-                    <button class="game-nav-btn" onclick="appendCalc('6')">6</button>
-                    <button class="game-nav-btn" onclick="solveCalc()">=</button>
-                    <button class="game-nav-btn" onclick="appendCalc('1')">1</button>
-                    <button class="game-nav-btn" onclick="appendCalc('2')">2</button>
-                    <button class="game-nav-btn" onclick="appendCalc('3')">3</button>
-                    <button class="game-nav-btn" onclick="appendCalc('0')">0</button>
-                </div>
-            </div>
-
-            <!-- Canvas Paint -->
-            <div id="paint-app" class="app-screen">
-                <div>
-                    <input type="color" id="paintColor" value="#f96332">
-                    <button class="launch-btn" onclick="clearCanvas()">Clear Canvas</button>
-                </div>
-                <canvas id="paintCanvas" width="500" height="300" style="background:white; border-radius:8px;"></canvas>
-            </div>
-
-            <!-- Stopwatch -->
-            <div id="stopwatch-app" class="app-screen">
-                <div id="stopwatchDisplay" style="font-size: 3rem; font-family: monospace;">00:00.00</div>
-                <div>
-                    <button class="launch-btn" onclick="startStopwatch()">Start</button>
-                    <button class="launch-btn" onclick="stopStopwatch()">Stop</button>
-                    <button class="launch-btn" onclick="resetStopwatch()">Reset</button>
-                </div>
-            </div>
-
-            <!-- Quick Notes -->
-            <div id="notes-app" class="app-screen">
-                <h2>Quick Notepad</h2>
-                <textarea id="notesArea" placeholder="Type your notes here..." oninput="saveNotes()"></textarea>
-            </div>
-
-        </div>
-    </div>
-
-    <script>
-        // Clock
-        setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
-
-        // App Navigation
-        function openApp(appName) {
-            document.querySelectorAll('.app-screen').forEach(app => app.classList.remove('active'));
-            document.getElementById(appName + '-app').classList.add('active');
-        }
-
-        // Consolidated Game Switching
-        function switchGame(gameId) {
-            document.querySelectorAll('.game-view').forEach(view => view.classList.remove('game-active'));
-            document.getElementById(gameId).classList.add('game-active');
-        }
-
-        // Search
-        function handleSearch(e) {
-            if (e.key === 'Enter') {
-                const query = document.getElementById('searchInput').value.trim();
-                if (query) window.open('https://duckduckgo.com/?q=' + encodeURIComponent(query), '_blank');
-            }
-        }
-
-        // Responsive Dawson AI Logic
-        function sendAiMessage(e) {
-            if (e.key === 'Enter') {
-                const input = document.getElementById('chatInput');
-                const msg = input.value.trim();
-                if(!msg) return;
-
-                const chatBox = document.getElementById('chatBox');
-                chatBox.innerHTML += `<div class="chat-msg user-msg">${msg}</div>`;
-                input.value = '';
-
-                setTimeout(() => {
-                    const lower = msg.toLowerCase();
-                    let reply = "";
-
-                    if (lower.includes("i love you")) {
-                        reply = "I appreciate that! Dawson OS is happy to have you here. ❤️";
-                    } else if (lower.includes("i own you")) {
-                        reply = "Indeed! You are the administrator of Dawson OS.";
-                    } else if (lower.includes("hello") || lower.includes("hi") || lower.includes("hey")) {
-                        reply = "Greetings! What are we building or testing today?";
-                    } else if (lower.includes("who made you") || lower.includes("creator")) {
-                        reply = "I am the built-in system assistant for Dawson OS!";
-                    } else if (lower.includes("game") || lower.includes("play")) {
-                        reply = "Check out the Game Center in the sidebar for Snake and Tic-Tac-Toe!";
-                    } else {
-                        const defaultResponses = [
-                            `I hear you! Regarding "${msg}", how can I assist further?`,
-                            "All systems running smoothly in Dawson OS.",
-                            "Command acknowledged. Let me know if you need tools, games, or notes!",
-                            "I'm here to help with whatever you need on Dawson OS."
-                        ];
-                        reply = defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
-                    }
-
-                    chatBox.innerHTML += `<div class="chat-msg ai-msg">${reply}</div>`;
-                    chatBox.scrollTop = chatBox.scrollHeight;
-                }, 300);
-            }
-        }
-
-        // Tic Tac Toe
-        let currentPlayer = 'X', boardState = ['', '', '', '', '', '', '', '', ''], gameActive = true;
-        const winningCombos = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-        function makeMove(cell, index) {
-            if (boardState[index] !== '' || !gameActive) return;
-            boardState[index] = currentPlayer; cell.innerText = currentPlayer;
-            if (winningCombos.some(c => c.every(i => boardState[i] === currentPlayer))) {
-                document.getElementById('status').innerText = `Player ${currentPlayer} Wins!`; gameActive = false; return;
-            }
-            if (!boardState.includes('')) { document.getElementById('status').innerText = "It's a Draw!"; gameActive = false; return; }
-            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-            document.getElementById('status').innerText = `Player ${currentPlayer}'s Turn`;
-        }
-        function resetGame() {
-            boardState = ['', '', '', '', '', '', '', '', '']; gameActive = true; currentPlayer = 'X';
-            document.getElementById('status').innerText = "Player X's Turn";
-            document.querySelectorAll('.cell').forEach(cell => cell.innerText = '');
-        }
-
-        // Snake Game
-        function startSnake() {
-            const canvas = document.getElementById('snakeCanvas');
-            const ctx = canvas.getContext('2d');
-            let snake = [{x: 180, y: 180}], food = {x: 80, y: 80}, dx = 20, dy = 0;
-            document.onkeydown = (e) => {
-                if (e.key === 'ArrowUp' && dy === 0) { dx = 0; dy = -20; }
-                if (e.key === 'ArrowDown' && dy === 0) { dx = 0; dy = 20; }
-                if (e.key === 'ArrowLeft' && dx === 0) { dx = -20; dy = 0; }
-                if (e.key === 'ArrowRight' && dx === 0) { dx = 20; dy = 0; }
-            };
-            let game = setInterval(() => {
-                let head = {x: snake[0].x + dx, y: snake[0].y + dy};
-                if(head.x < 0 || head.x >= 360 || head.y < 0 || head.y >= 360) { clearInterval(game); alert('Game Over!'); return; }
-                snake.unshift(head);
-                if(head.x === food.x && head.y === food.y) {
-                    food = {x: Math.floor(Math.random()*18)*20, y: Math.floor(Math.random()*18)*20};
-                } else { snake.pop(); }
-                ctx.fillStyle = '#1a1a20'; ctx.fillRect(0, 0, 360, 360);
-                ctx.fillStyle = '#f96332'; ctx.fillRect(food.x, food.y, 18, 18);
-                ctx.fillStyle = '#ffffff'; snake.forEach(part => ctx.fillRect(part.x, part.y, 18, 18));
-            }, 120);
-        }
-
-        // Calc
-        function appendCalc(v) { document.getElementById('calcDisplay').value += v; }
-        function clearCalc() { document.getElementById('calcDisplay').value = ''; }
-        function solveCalc() { try { document.getElementById('calcDisplay').value = eval(document.getElementById('calcDisplay').value); } catch { document.getElementById('calcDisplay').value = 'Error'; } }
-
-        // Paint
-        const pCanvas = document.getElementById('paintCanvas');
-        const pCtx = pCanvas.getContext('2d');
-        let painting = false;
-        pCanvas.addEventListener('mousedown', () => painting = true);
-        pCanvas.addEventListener('mouseup', () => { painting = false; pCtx.beginPath(); });
-        pCanvas.addEventListener('mousemove', (e) => {
-            if(!painting) return;
-            const rect = pCanvas.getBoundingClientRect();
-            pCtx.lineWidth = 4; pCtx.lineCap = 'round';
-            pCtx.strokeStyle = document.getElementById('paintColor').value;
-            pCtx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
-            pCtx.stroke(); pCtx.beginPath(); pCtx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
-        });
-        function clearCanvas() { pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height); }
-
-        // Stopwatch
-        let timer, ms = 0, running = false;
-        function startStopwatch() {
-            if(!running) {
-                running = true;
-                timer = setInterval(() => {
-                    ms += 10;
-                    let sec = Math.floor(ms / 1000);
-                    let msec = Math.floor((ms % 1000) / 10);
-                    document.getElementById('stopwatchDisplay').innerText = `${sec < 10 ? '0' : ''}${sec}:${msec < 10 ? '0' : ''}${msec}`;
-                }, 10);
-            }
-        }
-        function stopStopwatch() { running = false; clearInterval(timer); }
-        function resetStopwatch() { stopStopwatch(); ms = 0; document.getElementById('stopwatchDisplay').innerText = "00:00.00"; }
-
-        // Notes
-        document.getElementById('notesArea').value = localStorage.getItem('dawson_os_notes') || '';
-        function saveNotes() { localStorage.setItem('dawson_os_notes', document.getElementById('notesArea').value); }
-    </script>
-
-</body>
-</html>
+// ==========================================
+// DAWSON OS - CORE SYSTEM SCRIPT
+// ==========================================
+
+document.addEventListener('DOMContentLoaded', () => {
+  initClock();
+  initWindowManager();
+  initNotepad();
+  initCalculator();
+  initPaintApp();
+});
+
+/* --- 1. SYSTEM CLOCK --- */
+function initClock() {
+  const clockElement = document.getElementById('taskbar-clock');
+  if (!clockElement) return;
+
+  function updateTime() {
+    const now = new Date();
+    clockElement.innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  updateTime();
+  setInterval(updateTime, 1000);
+}
+
+/* --- 2. WINDOW MANAGEMENT & DRAGGING --- */
+let activeZIndex = 100;
+
+function initWindowManager() {
+  const windows = document.querySelectorAll('.os-window');
+
+  windows.forEach(win => {
+    // Bring window to front on click
+    win.addEventListener('mousedown', () => {
+      activeZIndex++;
+      win.style.zIndex = activeZIndex;
+    });
+
+    // Make window draggable via header
+    const header = win.querySelector('.window-header');
+    if (header) {
+      makeElementDraggable(win, header);
+    }
+
+    // Close button event
+    const closeBtn = win.querySelector('.btn-close');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        win.style.display = 'none';
+      });
+    }
+  });
+}
+
+function openWindow(windowId) {
+  const win = document.getElementById(windowId);
+  if (win) {
+    win.style.display = 'block';
+    activeZIndex++;
+    win.style.zIndex = activeZIndex;
+  }
+}
+
+function makeElementDraggable(elmnt, handle) {
+  let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+
+  handle.onmousedown = dragMouseDown;
+
+  function dragMouseDown(e) {
+    e = e || window.event;
+    e.preventDefault();
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    document.onmouseup = closeDragElement;
+    document.onmousemove = elementDrag;
+  }
+
+  function elementDrag(e) {
+    e = e || window.event;
+    e.preventDefault();
+    pos1 = pos3 - e.clientX;
+    pos2 = pos4 - e.clientY;
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+    elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+  }
+
+  function closeDragElement() {
+    document.onmouseup = null;
+    document.onmousemove = null;
+  }
+}
+
+/* --- 3. NOTEPAD APP (LOCAL STORAGE) --- */
+function initNotepad() {
+  const notepadArea = document.getElementById('notepad-textarea');
+  if (!notepadArea) return;
+
+  // Load saved note on startup
+  const savedNote = localStorage.getItem('dawson_os_note');
+  if (savedNote) {
+    notepadArea.value = savedNote;
+  }
+
+  // Auto-save changes
+  notepadArea.addEventListener('input', () => {
+    localStorage.setItem('dawson_os_note', notepadArea.value);
+  });
+}
+
+/* --- 4. CALCULATOR APP --- */
+let calcDisplayValue = "0";
+
+function initCalculator() {
+  updateCalcDisplay();
+}
+
+function calcInput(num) {
+  if (calcDisplayValue === "0") {
+    calcDisplayValue = num.toString();
+  } else {
+    calcDisplayValue += num.toString();
+  }
+  updateCalcDisplay();
+}
+
+function calcOperator(op) {
+  calcDisplayValue += ` ${op} `;
+  updateCalcDisplay();
+}
+
+function calcClear() {
+  calcDisplayValue = "0";
+  updateCalcDisplay();
+}
+
+function calcEquals() {
+  try {
+    // Basic evaluation for display string
+    const result = eval(calcDisplayValue.replace(/×/g, '*').replace(/÷/g, '/'));
+    calcDisplayValue = String(result);
+  } catch (err) {
+    calcDisplayValue = "Error";
+  }
+  updateCalcDisplay();
+}
+
+function updateCalcDisplay() {
+  const display = document.getElementById('calc-display');
+  if (display) {
+    display.innerText = calcDisplayValue;
+  }
+}
+
+/* --- 5. DAWSON PAINT APP --- */
+function initPaintApp() {
+  const canvas = document.getElementById('paint-canvas');
+  if (!canvas) return;
+
+  const ctx = canvas.getContext('2d');
+  let isDrawing = false;
+  let currentColor = '#000000';
+  let brushSize = 5;
+
+  // Set default background color
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Event handlers
+  canvas.addEventListener('mousedown', startDrawing);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', stopDrawing);
+  canvas.addEventListener('mouseout', stopDrawing);
+
+  const colorPicker = document.getElementById('paint-color');
+  if (colorPicker) {
+    colorPicker.addEventListener('change', (e) => currentColor = e.target.value);
+  }
+
+  const sizePicker = document.getElementById('paint-size');
+  if (sizePicker) {
+    sizePicker.addEventListener('change', (e) => brushSize = e.target.value);
+  }
+
+  function startDrawing(e) {
+    isDrawing = true;
+    draw(e);
+  }
+
+  function draw(e) {
+    if (!isDrawing) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    ctx.lineWidth = brushSize;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = currentColor;
+
+    ctx.lineTo(x, y);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+  }
+
+  function stopDrawing() {
+    isDrawing = false;
+    ctx.beginPath();
+  }
+}
+
+function clearCanvas() {
+  const canvas = document.getElementById('paint-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
